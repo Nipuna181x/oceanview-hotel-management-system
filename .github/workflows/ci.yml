@@ -1,0 +1,91 @@
+name: CI/CD Pipeline — Ocean View Resort HMS
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+      - 'test/**'
+      - 'ci/**'
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    name: Build, Test & Package
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Java 17 (Temurin / Eclipse Adoptium)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Step 3: Display Java and Maven version info
+      - name: Display environment info
+        run: |
+          java -version
+          mvn --version
+
+      # Step 4: Compile the project
+      - name: Compile
+        run: mvn clean compile --no-transfer-progress
+
+      # Step 5: Run all JUnit 5 tests
+      - name: Run Tests
+        run: mvn test --no-transfer-progress
+
+      # Step 6: Upload Surefire test reports as artifact
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+          retention-days: 30
+
+      # Step 7: Build the WAR package
+      - name: Package WAR
+        run: mvn package -DskipTests --no-transfer-progress
+
+      # Step 8: Upload WAR file as artifact
+      - name: Upload WAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oceanview-reservation-system-war
+          path: target/*.war
+          retention-days: 30
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Verify the full build lifecycle passes
+      - name: Verify Build
+        run: mvn verify --no-transfer-progress -DskipTests
+
+      - name: Report Success
+        run: echo "✅ Build and code quality checks passed successfully!"
+
