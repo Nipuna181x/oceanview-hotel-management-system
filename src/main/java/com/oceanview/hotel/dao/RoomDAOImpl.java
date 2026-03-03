@@ -1,0 +1,98 @@
+package com.oceanview.hotel.dao;
+
+import com.oceanview.hotel.model.Room;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * JDBC implementation of RoomDAO.
+ */
+public class RoomDAOImpl implements RoomDAO {
+
+    private final Connection connection;
+
+    public RoomDAOImpl(Connection connection) {
+        this.connection = connection;
+    }
+
+    @Override
+    public Room findById(int roomId) {
+        String sql = "SELECT * FROM rooms WHERE room_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, roomId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return mapRowToRoom(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Room findByRoomNumber(String roomNumber) {
+        String sql = "SELECT * FROM rooms WHERE room_number = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, roomNumber);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return mapRowToRoom(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Room> findAll() {
+        List<Room> list = new ArrayList<>();
+        String sql = "SELECT * FROM rooms ORDER BY room_number";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) list.add(mapRowToRoom(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public List<Room> findAvailable(Room.RoomType type) {
+        List<Room> list = new ArrayList<>();
+        String sql = type != null
+                ? "SELECT * FROM rooms WHERE is_available = TRUE AND room_type = ? ORDER BY room_number"
+                : "SELECT * FROM rooms WHERE is_available = TRUE ORDER BY room_number";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            if (type != null) stmt.setString(1, type.name());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) list.add(mapRowToRoom(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public boolean updateAvailability(int roomId, boolean available) {
+        String sql = "UPDATE rooms SET is_available = ? WHERE room_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setBoolean(1, available);
+            stmt.setInt(2, roomId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private Room mapRowToRoom(ResultSet rs) throws SQLException {
+        Room room = new Room();
+        room.setRoomId(rs.getInt("room_id"));
+        room.setRoomNumber(rs.getString("room_number"));
+        room.setRoomType(Room.RoomType.valueOf(rs.getString("room_type")));
+        room.setRatePerNight(rs.getDouble("rate_per_night"));
+        room.setAvailable(rs.getBoolean("is_available"));
+        return room;
+    }
+}
+
