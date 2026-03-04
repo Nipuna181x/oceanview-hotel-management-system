@@ -110,16 +110,20 @@
                     <input type="text" id="guestName" name="guestName" placeholder="e.g. John Smith" required />
                 </div>
                 <div class="form-group">
+                    <label for="nic">NIC Number *</label>
+                    <input type="text" id="nic" name="nic" placeholder="e.g. 199012345678 or 901234567V" required />
+                </div>
+                <div class="form-group">
                     <label for="contactNumber">Contact Number *</label>
                     <input type="text" id="contactNumber" name="contactNumber" placeholder="e.g. 0771234567" required />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="e.g. john@email.com" />
                 </div>
                 <div class="form-group full">
                     <label for="address">Address *</label>
                     <input type="text" id="address" name="address" placeholder="e.g. 123 Beach Road, Galle" required />
-                </div>
-                <div class="form-group full">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="e.g. john@email.com" />
                 </div>
             </div>
 
@@ -127,14 +131,20 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="roomId">Select Room *</label>
-                    <select id="roomId" name="roomId" required>
+                    <select id="roomId" name="roomId" required onchange="updateMaxOccupancy(this)">
                         <option value="">-- Select Available Room --</option>
                         <c:forEach var="room" items="${availableRooms}">
-                            <option value="${room.roomId}">
-                                Room ${room.roomNumber} — ${room.roomType} (Rs. ${room.ratePerNight}/night)
+                            <option value="${room.roomId}" data-max="${room.maxOccupancy}">
+                                Room ${room.roomNumber} — ${room.roomType} (Rs. ${room.ratePerNight}/night) | Max: ${room.maxOccupancy} guests
                             </option>
                         </c:forEach>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="numGuests">No. of Guests *</label>
+                    <input type="number" id="numGuests" name="numGuests" value="1" min="1" max="20" required
+                           placeholder="e.g. 2"/>
+                    <p style="font-size:12px;color:#95a5a6;margin-top:4px;" id="maxOccHint"></p>
                 </div>
                 <div class="form-group">
                     <label for="pricingStrategy">Pricing Strategy *</label>
@@ -172,6 +182,20 @@
     document.getElementById('checkInDate').addEventListener('change', function() {
         document.getElementById('checkOutDate').min = this.value;
     });
+
+    function updateMaxOccupancy(sel) {
+        var opt = sel.options[sel.selectedIndex];
+        var maxOcc = opt.getAttribute('data-max');
+        var numGuestsInput = document.getElementById('numGuests');
+        var hint = document.getElementById('maxOccHint');
+        if (maxOcc) {
+            numGuestsInput.max = maxOcc;
+            hint.textContent = '👥 Max occupancy for selected room: ' + maxOcc + ' guests';
+        } else {
+            numGuestsInput.max = 20;
+            hint.textContent = '';
+        }
+    }
 </script>
 </body>
 </html>

@@ -24,19 +24,21 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public String save(Reservation reservation, Guest guest) {
         // Call the stored procedure sp_create_reservation
-        String sql = "{CALL sp_create_reservation(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "{CALL sp_create_reservation(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try (CallableStatement stmt = connection.prepareCall(sql)) {
             stmt.setString(1, guest.getFullName());
             stmt.setString(2, guest.getAddress());
             stmt.setString(3, guest.getContactNumber());
             stmt.setString(4, guest.getEmail());
-            stmt.setInt(5, reservation.getRoomId());
-            stmt.setDate(6, Date.valueOf(reservation.getCheckInDate()));
-            stmt.setDate(7, Date.valueOf(reservation.getCheckOutDate()));
-            stmt.setInt(8, reservation.getCreatedBy());
-            stmt.registerOutParameter(9, Types.VARCHAR);
+            stmt.setString(5, guest.getNic());
+            stmt.setInt(6, reservation.getRoomId());
+            stmt.setDate(7, Date.valueOf(reservation.getCheckInDate()));
+            stmt.setDate(8, Date.valueOf(reservation.getCheckOutDate()));
+            stmt.setInt(9, reservation.getCreatedBy());
+            stmt.setInt(10, reservation.getNumGuests());
+            stmt.registerOutParameter(11, Types.VARCHAR);
             stmt.execute();
-            return stmt.getString(9);
+            return stmt.getString(11);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to create reservation: " + e.getMessage(), e);
@@ -45,7 +47,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public Reservation findByReservationNumber(String reservationNumber) {
-        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, " +
+        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, g.nic, " +
                 "rm.room_number, rm.room_type, rm.rate_per_night, rm.is_available " +
                 "FROM reservations r " +
                 "JOIN guests g ON r.guest_id = g.guest_id " +
@@ -65,7 +67,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public Reservation findById(int reservationId) {
-        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, " +
+        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, g.nic, " +
                 "rm.room_number, rm.room_type, rm.rate_per_night, rm.is_available " +
                 "FROM reservations r " +
                 "JOIN guests g ON r.guest_id = g.guest_id " +
@@ -86,7 +88,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public List<Reservation> findAll() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, " +
+        String sql = "SELECT r.*, g.full_name, g.address, g.contact_number, g.email, g.nic, " +
                 "rm.room_number, rm.room_type, rm.rate_per_night, rm.is_available " +
                 "FROM reservations r " +
                 "JOIN guests g ON r.guest_id = g.guest_id " +
@@ -126,6 +128,7 @@ public class ReservationDAOImpl implements ReservationDAO {
         r.setCheckOutDate(rs.getDate("check_out_date").toLocalDate());
         r.setStatus(Reservation.Status.valueOf(rs.getString("status")));
         r.setCreatedBy(rs.getInt("created_by"));
+        r.setNumGuests(rs.getInt("num_guests"));
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) r.setCreatedAt(ts.toLocalDateTime());
 
@@ -136,6 +139,7 @@ public class ReservationDAOImpl implements ReservationDAO {
         g.setAddress(rs.getString("address"));
         g.setContactNumber(rs.getString("contact_number"));
         g.setEmail(rs.getString("email"));
+        g.setNic(rs.getString("nic"));
         r.setGuest(g);
 
         // Map room

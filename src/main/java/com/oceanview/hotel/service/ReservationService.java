@@ -39,10 +39,14 @@ public class ReservationService {
      * @throws RoomNotAvailableException  if the room is not available
      */
     public String createReservation(String guestName, String address, String contactNumber,
-                                    String email, int roomId,
+                                    String email, String nic, int numGuests, int roomId,
                                     LocalDate checkIn, LocalDate checkOut, int createdBy) {
         // Step 1: Validate all inputs
         validator.validateAll(guestName, address, contactNumber, checkIn, checkOut);
+
+        if (numGuests <= 0) {
+            throw new IllegalArgumentException("Number of guests must be at least 1");
+        }
 
         // Step 2: Check room exists
         Room room = roomDAO.findById(roomId);
@@ -56,7 +60,13 @@ public class ReservationService {
                     "Room " + room.getRoomNumber() + " is not available for the requested dates");
         }
 
-        // Step 4: Build reservation and guest objects (Builder pattern)
+        // Step 4: Validate numGuests against max occupancy
+        if (numGuests > room.getMaxOccupancy()) {
+            throw new IllegalArgumentException(
+                    "Number of guests (" + numGuests + ") exceeds room max occupancy (" + room.getMaxOccupancy() + ")");
+        }
+
+        // Step 5: Build reservation and guest objects (Builder pattern)
         Reservation reservation = new ReservationBuilder()
                 .roomId(roomId)
                 .checkIn(checkIn)
@@ -64,14 +74,16 @@ public class ReservationService {
                 .createdBy(createdBy)
                 .status(Reservation.Status.CONFIRMED)
                 .build();
+        reservation.setNumGuests(numGuests);
 
         Guest guest = new Guest();
         guest.setFullName(guestName);
         guest.setAddress(address);
         guest.setContactNumber(contactNumber);
         guest.setEmail(email);
+        guest.setNic(nic);
 
-        // Step 5: Persist via DAO (calls sp_create_reservation stored procedure)
+        // Step 6: Persist via DAO (calls sp_create_reservation stored procedure)
         return reservationDAO.save(reservation, guest);
     }
 

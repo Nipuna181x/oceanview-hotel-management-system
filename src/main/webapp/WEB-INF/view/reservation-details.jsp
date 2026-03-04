@@ -63,6 +63,7 @@
         <div class="section-title">👤 Guest Information</div>
         <div class="detail-grid" style="margin-bottom:24px;">
             <div class="detail-item"><label>Full Name</label><span>${reservation.guest.fullName}</span></div>
+            <div class="detail-item"><label>NIC Number</label><span>${not empty reservation.guest.nic ? reservation.guest.nic : '—'}</span></div>
             <div class="detail-item"><label>Contact Number</label><span>${reservation.guest.contactNumber}</span></div>
             <div class="detail-item"><label>Email</label><span>${not empty reservation.guest.email ? reservation.guest.email : '—'}</span></div>
             <div class="detail-item"><label>Address</label><span>${reservation.guest.address}</span></div>
@@ -73,6 +74,7 @@
             <div class="detail-item"><label>Room Number</label><span>${reservation.room.roomNumber}</span></div>
             <div class="detail-item"><label>Room Type</label><span>${reservation.room.roomType}</span></div>
             <div class="detail-item"><label>Rate Per Night</label><span>Rs. ${reservation.room.ratePerNight}</span></div>
+            <div class="detail-item"><label>No. of Guests</label><span>${reservation.numGuests}</span></div>
             <div class="detail-item"><label>Check-In Date</label><span>${reservation.checkInDate}</span></div>
             <div class="detail-item"><label>Check-Out Date</label><span>${reservation.checkOutDate}</span></div>
             <div class="detail-item"><label>Created At</label><span>${reservation.createdAt}</span></div>

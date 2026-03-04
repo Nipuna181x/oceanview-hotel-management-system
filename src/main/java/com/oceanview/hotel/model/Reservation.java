@@ -21,6 +21,7 @@ public class Reservation {
     private Status status;
     private int createdBy;
     private LocalDateTime createdAt;
+    private int numGuests;
 
     // Transient references for display purposes (not persisted directly)
     private Guest guest;
@@ -115,6 +116,14 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
+    public int getNumGuests() {
+        return numGuests;
+    }
+
+    public void setNumGuests(int numGuests) {
+        this.numGuests = numGuests;
+    }
+
     public Guest getGuest() {
         return guest;
     }
@@ -142,6 +151,7 @@ public class Reservation {
                 ", checkOutDate=" + checkOutDate +
                 ", status=" + status +
                 ", createdBy=" + createdBy +
+                ", numGuests=" + numGuests +
                 ", createdAt=" + createdAt +
                 '}';
     }

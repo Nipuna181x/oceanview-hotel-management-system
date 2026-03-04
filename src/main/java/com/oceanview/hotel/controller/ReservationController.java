@@ -119,17 +119,20 @@ public class ReservationController extends HttpServlet {
         String address       = request.getParameter("address");
         String contactNumber = request.getParameter("contactNumber");
         String email         = request.getParameter("email");
+        String nic           = request.getParameter("nic");
+        String numGuestsStr  = request.getParameter("numGuests");
         String roomIdStr     = request.getParameter("roomId");
         String checkInStr    = request.getParameter("checkInDate");
         String checkOutStr   = request.getParameter("checkOutDate");
 
         try {
             int roomId = Integer.parseInt(roomIdStr);
+            int numGuests = (numGuestsStr != null && !numGuestsStr.isEmpty()) ? Integer.parseInt(numGuestsStr) : 1;
             LocalDate checkIn  = LocalDate.parse(checkInStr);
             LocalDate checkOut = LocalDate.parse(checkOutStr);
 
             String resNumber = reservationService.createReservation(
-                    guestName, address, contactNumber, email,
+                    guestName, address, contactNumber, email, nic, numGuests,
                     roomId, checkIn, checkOut, createdBy
             );
 

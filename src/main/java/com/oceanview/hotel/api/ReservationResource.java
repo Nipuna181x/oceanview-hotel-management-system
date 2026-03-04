@@ -53,6 +53,8 @@ public class ReservationResource {
                     body.get("address"),
                     body.get("contactNumber"),
                     body.get("email"),
+                    body.get("nic"),
+                    body.get("numGuests") != null ? Integer.parseInt(body.get("numGuests")) : 1,
                     Integer.parseInt(body.get("roomId")),
                     LocalDate.parse(body.get("checkInDate")),
                     LocalDate.parse(body.get("checkOutDate")),
