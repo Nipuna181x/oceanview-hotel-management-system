@@ -5,6 +5,7 @@ import com.oceanview.hotel.model.Bill;
 import com.oceanview.hotel.model.PricingRate;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.service.*;
+import com.oceanview.hotel.util.LogUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -117,6 +118,7 @@ public class BillingController extends HttpServlet {
                 int strategyId = Integer.parseInt(strategyIdStr);
 
                 Bill bill = billingService.generateBill(reservationId, strategyId);
+                LogUtil.log(request, "GENERATE_BILL", "Generated bill for reservation ID: " + reservationId + " | Total: Rs." + bill.getTotalAmount() + " | Strategy: " + bill.getPricingStrategyUsed());
                 Reservation reservation = reservationService.getById(reservationId);
                 request.setAttribute("bill", bill);
                 request.setAttribute("reservation", reservation);

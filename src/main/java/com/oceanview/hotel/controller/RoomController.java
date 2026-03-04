@@ -5,6 +5,7 @@ import com.oceanview.hotel.dao.RoomDAOImpl;
 import com.oceanview.hotel.model.Room;
 import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.RoomService;
+import com.oceanview.hotel.util.LogUtil;
 import com.oceanview.hotel.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -78,6 +79,7 @@ public class RoomController extends HttpServlet {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
                 roomService.deleteRoom(id);
+                LogUtil.log(request, "DELETE_ROOM", "Deleted room ID: " + id);
                 request.getSession().setAttribute("successMessage", "Room deleted successfully.");
             } catch (Exception e) {
                 request.getSession().setAttribute("errorMessage", e.getMessage());
@@ -110,6 +112,7 @@ public class RoomController extends HttpServlet {
                 double rate = Double.parseDouble(rateStr);
                 boolean available = "true".equals(availStr);
                 roomService.addRoom(roomNumber, roomType, maxOcc, rate, description, available);
+                LogUtil.log(request, "CREATE_ROOM", "Created room: " + roomNumber + " [" + roomType + "] Rs." + rate + "/night");
                 request.getSession().setAttribute("successMessage", "Room " + roomNumber + " added successfully.");
                 response.sendRedirect(request.getContextPath() + "/rooms");
             } catch (IllegalArgumentException e) {
@@ -132,6 +135,7 @@ public class RoomController extends HttpServlet {
                 double rate = Double.parseDouble(rateStr);
                 boolean available = "true".equals(availStr);
                 roomService.updateRoom(id, roomNumber, roomType, maxOcc, rate, description, available);
+                LogUtil.log(request, "UPDATE_ROOM", "Updated room: " + roomNumber + " [ID:" + id + "]");
                 request.getSession().setAttribute("successMessage", "Room updated successfully.");
                 response.sendRedirect(request.getContextPath() + "/rooms");
             } catch (Exception e) {

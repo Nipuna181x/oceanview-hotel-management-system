@@ -10,6 +10,7 @@ import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.PricingRateService;
 import com.oceanview.hotel.service.ReservationService;
 import com.oceanview.hotel.service.RoomNotAvailableException;
+import com.oceanview.hotel.util.LogUtil;
 import com.oceanview.hotel.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -62,20 +63,20 @@ public class ReservationController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/cancel")) {
-            // Cancel reservation
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.cancelReservation(id);
+                LogUtil.log(request, "CANCEL_RESERVATION", "Cancelled reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations?msg=cancelled");
             } catch (Exception e) {
                 response.sendRedirect(request.getContextPath() + "/reservations?error=" + e.getMessage());
             }
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/checkin")) {
-            // Check in
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.checkIn(id);
+                LogUtil.log(request, "CHECK_IN", "Checked in reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations/" +
                         reservationService.getById(id).getReservationNumber());
             } catch (Exception e) {
@@ -83,10 +84,10 @@ public class ReservationController extends HttpServlet {
             }
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/checkout")) {
-            // Check out
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.checkOut(id);
+                LogUtil.log(request, "CHECK_OUT", "Checked out reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations/" +
                         reservationService.getById(id).getReservationNumber());
             } catch (Exception e) {
@@ -142,6 +143,7 @@ public class ReservationController extends HttpServlet {
                     guestName, address, contactNumber, email, nic, numGuests,
                     roomId, checkIn, checkOut, createdBy
             );
+            LogUtil.log(request, "CREATE_RESERVATION", "Created reservation " + resNumber + " for guest: " + guestName);
 
             request.setAttribute("successMessage",
                     "Reservation created successfully! Number: " + resNumber);

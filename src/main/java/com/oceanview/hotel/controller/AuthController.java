@@ -4,6 +4,7 @@ import com.oceanview.hotel.dao.UserDAOImpl;
 import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.AuthService;
 import com.oceanview.hotel.service.InvalidCredentialsException;
+import com.oceanview.hotel.util.LogUtil;
 import com.oceanview.hotel.util.SessionUtil;
 import com.oceanview.hotel.dao.DBConnectionFactory;
 
@@ -45,6 +46,7 @@ public class AuthController extends HttpServlet {
         String path = request.getServletPath();
 
         if ("/logout".equals(path)) {
+            LogUtil.log(request, "LOGOUT", "User logged out");
             SessionUtil.logout(request, response);
             response.sendRedirect(request.getContextPath() + "/login?message=loggedout");
             return;
@@ -81,6 +83,7 @@ public class AuthController extends HttpServlet {
 
             // Store user in session
             SessionUtil.setLoggedInUser(request, user);
+            LogUtil.log(request, "LOGIN", "User logged in: " + username + " [" + user.getRole() + "]");
 
             // Set remember-me cookie if requested
             if ("on".equals(rememberMe)) {
@@ -94,6 +97,7 @@ public class AuthController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/view/login.jsp").forward(request, response);
 
         } catch (InvalidCredentialsException e) {
+            LogUtil.log(request, "LOGIN_FAILED", "Failed login attempt for username: " + username);
             request.setAttribute("errorMessage", "Invalid username or password. Please try again.");
             request.setAttribute("enteredUsername", username);
             request.getRequestDispatcher("/WEB-INF/view/login.jsp").forward(request, response);

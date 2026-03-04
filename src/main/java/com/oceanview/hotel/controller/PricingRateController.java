@@ -5,6 +5,7 @@ import com.oceanview.hotel.dao.PricingRateDAOImpl;
 import com.oceanview.hotel.model.PricingRate;
 import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.PricingRateService;
+import com.oceanview.hotel.util.LogUtil;
 import com.oceanview.hotel.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -62,6 +63,7 @@ public class PricingRateController extends HttpServlet {
             } else if (pathInfo.equals("/delete")) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 pricingRateService.deleteStrategy(id);
+                LogUtil.log(request, "DELETE_STRATEGY", "Deleted pricing strategy ID: " + id);
                 request.getSession().setAttribute("successMessage", "Pricing strategy deleted successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
             }
@@ -89,6 +91,7 @@ public class PricingRateController extends HttpServlet {
                 boolean isDefault = "on".equals(request.getParameter("isDefault"));
 
                 pricingRateService.addStrategy(name, adjustmentType, adjustmentPercent, description, isDefault);
+                LogUtil.log(request, "CREATE_STRATEGY", "Created pricing strategy: " + name + " [" + adjustmentType + " " + adjustmentPercent + "%]");
                 request.getSession().setAttribute("successMessage", "Pricing strategy added successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
             } catch (Exception e) {
@@ -107,6 +110,7 @@ public class PricingRateController extends HttpServlet {
                 boolean isDefault = "on".equals(request.getParameter("isDefault"));
 
                 pricingRateService.updateStrategy(id, name, adjustmentType, adjustmentPercent, description, isDefault);
+                LogUtil.log(request, "UPDATE_STRATEGY", "Updated pricing strategy ID: " + id + " -> " + name);
                 request.getSession().setAttribute("successMessage", "Pricing strategy updated successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
             } catch (Exception e) {
