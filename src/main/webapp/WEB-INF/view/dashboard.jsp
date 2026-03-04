@@ -166,6 +166,14 @@
             <h3>Help</h3>
             <p>Usage guide and system documentation for staff.</p>
         </a>
+
+        <c:if test="${currentUser.role == 'ADMIN'}">
+        <a href="${pageContext.request.contextPath}/staff" class="card card-red">
+            <div class="icon">👥</div>
+            <h3>Staff Management</h3>
+            <p>Create, edit and delete staff accounts. Admin only.</p>
+        </a>
+        </c:if>
     </div>
 
 </div>
