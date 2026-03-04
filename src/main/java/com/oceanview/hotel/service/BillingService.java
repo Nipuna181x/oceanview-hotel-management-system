@@ -16,14 +16,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service class encapsulating all billing business logic.
- *
- * Strategy Pattern — resolves pricing strategy from DB at runtime.
- */
+// Calculates and saves bills using the chosen pricing strategy
 public class BillingService {
 
-    private static final double TAX_RATE = 0.10; // 10% tax
+    private static final double TAX_RATE = 0.10; // 10%
 
     private final BillDAO billDAO;
     private final ReservationDAO reservationDAO;
@@ -35,16 +31,12 @@ public class BillingService {
         this.pricingRateDAO = pricingRateDAO;
     }
 
-    /**
-     * Generate a bill for a reservation using the specified pricing strategy ID.
-     */
     public Bill generateBill(int reservationId, int strategyId) {
         Reservation reservation = reservationDAO.findById(reservationId);
         if (reservation == null) {
             throw new ReservationNotFoundException("Reservation not found with ID: " + reservationId);
         }
 
-        // Look up strategy from DB
         PricingRate strategyRecord = pricingRateDAO.findById(strategyId);
         if (strategyRecord == null) {
             throw new IllegalArgumentException("Pricing strategy not found with ID: " + strategyId);
@@ -98,6 +90,7 @@ public class BillingService {
         return bill;
     }
 
+    // Only checked-in/out reservations that haven't been billed yet
     public List<Reservation> getUnbilledReservations() {
         List<Reservation> all = reservationDAO.findAll();
         return all.stream()

@@ -2,9 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a hotel guest who makes a reservation.
- */
+// Guest who made a reservation
 public class Guest {
 
     private int guestId;
@@ -97,4 +95,3 @@ public class Guest {
                 '}';
     }
 }
-

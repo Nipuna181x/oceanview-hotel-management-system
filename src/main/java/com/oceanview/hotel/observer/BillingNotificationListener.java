@@ -1,11 +1,6 @@
 package com.oceanview.hotel.observer;
 
-/**
- * Observer Pattern — Concrete listener that logs billing-related
- * notifications when reservation events occur.
- *
- * Registered for GUEST_CHECKED_OUT events to trigger bill generation reminders.
- */
+// Logs a reminder when a guest checks out — bill should be generated
 public class BillingNotificationListener implements EventListener {
 
     @Override
@@ -15,4 +10,3 @@ public class BillingNotificationListener implements EventListener {
         }
     }
 }
-

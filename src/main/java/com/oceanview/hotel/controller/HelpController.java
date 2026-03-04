@@ -7,9 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Servlet controller for the help page.
- */
+// Serves the help & guide page
 @WebServlet("/help")
 public class HelpController extends HttpServlet {
 

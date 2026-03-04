@@ -13,10 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Servlet controller for the main dashboard.
- * Requires authentication — protected by AuthenticationFilter.
- */
+// Dashboard — loads stats and forwards to dashboard.jsp
 @WebServlet("/dashboard")
 public class DashboardController extends HttpServlet {
 

@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Servlet controller for System Logs.
- * ADMIN only — all requests checked for ADMIN role.
- */
+// System logs viewer — admin only
 @WebServlet("/logs/*")
 public class SystemLogController extends HttpServlet {
 

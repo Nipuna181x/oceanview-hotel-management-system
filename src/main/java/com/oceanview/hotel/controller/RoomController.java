@@ -16,10 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Servlet controller for room management.
- * Viewing: all users. Add/Edit/Delete: Admin only.
- */
+// Room list — everyone can view; add/edit/delete is admin only
 @WebServlet("/rooms/*")
 public class RoomController extends HttpServlet {
 

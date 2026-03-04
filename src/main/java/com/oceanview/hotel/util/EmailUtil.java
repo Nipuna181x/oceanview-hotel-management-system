@@ -4,15 +4,7 @@ import javax.mail.*;
 import javax.mail.internet.*;
 import java.util.Properties;
 
-/**
- * Utility class for sending email notifications using JavaMail.
- *
- * Used by EmailNotificationListener (Observer pattern) to send
- * reservation confirmation and cancellation emails to guests.
- *
- * In production, configure SMTP_HOST, SMTP_USER, SMTP_PASS
- * via environment variables or a config file.
- */
+// Sends email notifications via SMTP — configure EMAIL_USER/EMAIL_PASS env vars in production
 public class EmailUtil {
 
     private static final String SMTP_HOST = "smtp.gmail.com";
@@ -22,16 +14,8 @@ public class EmailUtil {
     private static final String SMTP_PASS = System.getenv("EMAIL_PASS") != null
             ? System.getenv("EMAIL_PASS") : "";
 
-    private EmailUtil() {
-    }
+    private EmailUtil() {}
 
-    /**
-     * Send an email notification.
-     *
-     * @param toEmail   recipient email address
-     * @param subject   email subject
-     * @param body      email body (plain text)
-     */
     public static void send(String toEmail, String subject, String body) {
         if (toEmail == null || toEmail.trim().isEmpty()) {
             System.out.println("[EmailUtil] No email address provided — skipping.");

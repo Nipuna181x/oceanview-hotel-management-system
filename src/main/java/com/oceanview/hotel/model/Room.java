@@ -1,8 +1,6 @@
 package com.oceanview.hotel.model;
 
-/**
- * Represents a hotel room with type, rate, and availability.
- */
+// Hotel room with its type, rate and availability status
 public class Room {
 
     public enum RoomType {
@@ -30,7 +28,7 @@ public class Room {
         this.available = available;
     }
 
-    /** Legacy constructor for backward compatibility */
+    /** Backwards-compat constructor, defaults to occupancy 2 */
     public Room(int roomId, String roomNumber, RoomType roomType, double ratePerNight, boolean available) {
         this(roomId, roomNumber, roomType, 2, ratePerNight, null, available);
     }
@@ -104,4 +102,3 @@ public class Room {
                 '}';
     }
 }
-

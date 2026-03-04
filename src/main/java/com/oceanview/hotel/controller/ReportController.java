@@ -17,9 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Servlet controller for reports.
- */
+// Generate and view occupancy/revenue reports
 @WebServlet(urlPatterns = {"/reports", "/reports/*"})
 public class ReportController extends HttpServlet {
 

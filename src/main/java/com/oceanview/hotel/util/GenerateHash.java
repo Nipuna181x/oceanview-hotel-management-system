@@ -3,9 +3,7 @@ package com.oceanview.hotel.util;
 import org.mindrot.jbcrypt.BCrypt;
 import java.io.FileWriter;
 
-/**
- * Utility to generate BCrypt hashes for seeding the database.
- */
+// Run this once to generate seed hashes for the DB — not used in production
 public class GenerateHash {
     public static void main(String[] args) throws Exception {
         String adminHash = BCrypt.hashpw("admin123", BCrypt.gensalt(12));
@@ -17,6 +15,3 @@ public class GenerateHash {
         }
     }
 }
-
-
-

@@ -7,10 +7,7 @@ import com.oceanview.hotel.service.SystemLogService;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Utility for writing system audit logs from any controller.
- * Uses a fresh DAO per call to avoid stale connection issues.
- */
+// Writes audit log entries from any controller — never throws, so it never breaks the main flow
 public class LogUtil {
 
     private static SystemLogService getService() {
@@ -25,8 +22,7 @@ public class LogUtil {
             String ip = request.getRemoteAddr();
             getService().writeLog(userId, username, action, details, ip);
         } catch (Exception e) {
-            e.printStackTrace(); // never let logging break the main flow
+            e.printStackTrace();
         }
     }
 }
-

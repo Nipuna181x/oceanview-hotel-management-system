@@ -2,13 +2,7 @@ package com.oceanview.hotel.strategy;
 
 import com.oceanview.hotel.model.PricingRate;
 
-/**
- * Database-driven pricing strategy.
- * Reads adjustment from the PricingRate record stored in the DB.
- *
- * Strategy Pattern — single implementation that replaces the 3 old
- * hardcoded strategies (Standard, Seasonal, Discount).
- */
+// Reads the adjustment multiplier from the DB-backed PricingRate record
 public class DatabasePricingStrategy implements PricingStrategy {
 
     private final PricingRate record;
@@ -28,4 +22,3 @@ public class DatabasePricingStrategy implements PricingStrategy {
         return record.getName();
     }
 }
-

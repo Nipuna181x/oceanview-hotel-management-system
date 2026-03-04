@@ -2,21 +2,13 @@ package com.oceanview.hotel.observer;
 
 import com.oceanview.hotel.util.EmailUtil;
 
-/**
- * Observer Pattern — Concrete listener that sends email notifications
- * when reservation events occur.
- *
- * Registered with EventManager for RESERVATION_CREATED and
- * RESERVATION_CANCELLED events. When fired, it calls EmailUtil
- * to send a notification email to the guest.
- */
+// Sends email to guests when reservations are created, cancelled, or status changes
 public class EmailNotificationListener implements EventListener {
 
     @Override
     public void onEvent(String eventType, Object data) {
         String message = buildMessage(eventType, data);
-        // In production: EmailUtil.send(guestEmail, subject, message)
-        // For demonstration, we log to console
+        // In production, call EmailUtil.send(guestEmail, subject, message)
         System.out.println("[EmailNotification] Event: " + eventType + " | " + message);
     }
 
@@ -35,4 +27,3 @@ public class EmailNotificationListener implements EventListener {
         }
     }
 }
-

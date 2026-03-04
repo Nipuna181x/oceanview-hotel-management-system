@@ -2,10 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents an admin-configurable pricing strategy.
- * E.g. "Standard" (0%), "Seasonal" (+20%), "Long Stay" (-10%).
- */
+// Admin-defined pricing strategy — e.g. Standard (0%), Seasonal (+20%), Long Stay (-10%)
 public class PricingRate {
 
     public enum AdjustmentType {
@@ -40,17 +37,14 @@ public class PricingRate {
     public boolean isDefault() { return isDefault; }
     public void setDefault(boolean isDefault) { this.isDefault = isDefault; }
 
-    /** Alias for JSP EL — avoids 'default' reserved keyword: use ${s.strategyDefault} */
+    // JSP EL can't access 'isDefault()' due to reserved keyword — use this instead
     public boolean isStrategyDefault() { return isDefault; }
     public void setStrategyDefault(boolean isDefault) { this.isDefault = isDefault; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    /**
-     * Returns the effective multiplier.
-     * SURCHARGE +20% → 1.20, DISCOUNT 10% → 0.90
-     */
+    // SURCHARGE +20% → 1.20, DISCOUNT 10% → 0.90
     public double getMultiplier() {
         if (adjustmentType == AdjustmentType.DISCOUNT) {
             return 1.0 - (adjustmentPercent / 100.0);
@@ -58,9 +52,7 @@ public class PricingRate {
         return 1.0 + (adjustmentPercent / 100.0);
     }
 
-    /**
-     * Human-readable label for display: e.g. "+20%" or "-10%"
-     */
+    // Display label like "+20%" or "-10%"
     public String getAdjustmentLabel() {
         if (adjustmentPercent == 0) return "0%";
         if (adjustmentType == AdjustmentType.DISCOUNT) return "-" + adjustmentPercent + "%";

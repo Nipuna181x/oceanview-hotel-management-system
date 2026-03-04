@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Servlet controller for billing operations.
- * Handles: bill history list, view single bill, generate bill page.
- */
+// Billing — list, view and generate bills
 @WebServlet("/billing/*")
 public class BillingController extends HttpServlet {
 

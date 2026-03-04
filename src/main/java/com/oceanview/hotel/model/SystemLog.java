@@ -3,8 +3,7 @@ package com.oceanview.hotel.model;
 import java.time.LocalDateTime;
 
 /**
- * Represents a system audit log entry.
- * Only Admins can view system logs.
+ * Audit log entry — admin-only view
  */
 public class SystemLog {
 
@@ -45,4 +44,3 @@ public class SystemLog {
                 "', action='" + action + "', loggedAt=" + loggedAt + "}";
     }
 }
-

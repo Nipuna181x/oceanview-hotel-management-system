@@ -15,14 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Servlet controller handling login and logout requests.
- *
- * MVC Pattern: This is the Controller in the MVC pattern.
- * - GET /login  → shows the login page (View)
- * - POST /login → processes credentials, creates session, redirects
- * - GET /logout → invalidates session, redirects to login
- */
+// Handles login and logout
 @WebServlet(urlPatterns = {"/login", "/logout"})
 public class AuthController extends HttpServlet {
 
@@ -35,10 +28,7 @@ public class AuthController extends HttpServlet {
         );
     }
 
-    /**
-     * GET /login  — show the login form
-     * GET /logout — log the user out
-     */
+    // GET /login shows the form; GET /logout clears the session
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,7 +42,7 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        // If already logged in, go to dashboard
+        // Already logged in — skip the login page
         if (SessionUtil.isLoggedIn(request)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
@@ -67,9 +57,7 @@ public class AuthController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/view/login.jsp").forward(request, response);
     }
 
-    /**
-     * POST /login — process login form submission
-     */
+    // POST /login — validate credentials and create session
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -81,11 +69,9 @@ public class AuthController extends HttpServlet {
         try {
             User user = authService.login(username, password);
 
-            // Store user in session
             SessionUtil.setLoggedInUser(request, user);
             LogUtil.log(request, "LOGIN", "User logged in: " + username + " [" + user.getRole() + "]");
 
-            // Set remember-me cookie if requested
             if ("on".equals(rememberMe)) {
                 SessionUtil.setRememberMeCookie(response, username);
             }
@@ -104,4 +90,3 @@ public class AuthController extends HttpServlet {
         }
     }
 }
-

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Represents a saved report history entry.
+ * Saved report snapshot for a given date range.
  */
 public class ReportHistory {
 
@@ -59,4 +59,3 @@ public class ReportHistory {
     public LocalDateTime getGeneratedAt() { return generatedAt; }
     public void setGeneratedAt(LocalDateTime generatedAt) { this.generatedAt = generatedAt; }
 }
-

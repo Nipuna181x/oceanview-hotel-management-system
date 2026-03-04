@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Servlet controller for reservation operations.
- * MVC Pattern — Controller handling all reservation-related HTTP requests.
- */
+// Handles all reservation routes — list, view, create, check-in/out, cancel
 @WebServlet(urlPatterns = {"/reservations", "/reservations/new", "/reservations/*"})
 public class ReservationController extends HttpServlet {
 

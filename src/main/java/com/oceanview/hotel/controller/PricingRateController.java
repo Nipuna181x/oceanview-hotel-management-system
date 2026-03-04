@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Servlet controller for Pricing Rate Management.
- * ADMIN only — all requests checked for ADMIN role.
- */
+// Pricing rate CRUD — admin only
 @WebServlet("/pricing/*")
 public class PricingRateController extends HttpServlet {
 
