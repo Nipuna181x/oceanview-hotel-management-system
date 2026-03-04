@@ -58,6 +58,12 @@
         .btn-sm { padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-block; }
         .btn-view   { background:#eaf4fb; color:#1e6091; }
         .btn-view:hover { background:#d0eaf8; }
+        .search-bar { background:white; border-radius:12px; padding:14px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+        .search-bar input, .search-bar select { padding:9px 14px; border:1px solid #d5d8dc; border-radius:8px; font-size:13px; outline:none; }
+        .search-bar input { flex:1; min-width:180px; }
+        .search-bar input:focus { border-color:#2980b9; }
+        .search-bar .clear-btn { padding:9px 16px; border-radius:8px; border:none; background:#ecf0f1; color:#555; font-size:13px; cursor:pointer; font-weight:600; }
+        .result-count { font-size:12px; color:#888; }
         .btn-delete { background:#fdecea; color:#c0392b; }
         .btn-delete:hover { background:#fbd4d0; }
         .alert-success { background:#eafaf1; border-left:4px solid #27ae60; color:#1e8449; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
@@ -246,6 +252,19 @@
     <%-- ── REPORT HISTORY ── --%>
     <div id="reportHistory" class="no-print">
         <div class="section-divider">📁 Report History</div>
+        <c:if test="${not empty reportHistory}">
+        <div class="search-bar">
+            <input type="text" id="reportSearch" placeholder="🔍 Search by date period..." oninput="filterReports()">
+            <div>
+                <input type="date" id="reportFrom" onchange="filterReports()" style="width:150px;" placeholder="From date">
+            </div>
+            <div>
+                <input type="date" id="reportTo" onchange="filterReports()" style="width:150px;" placeholder="To date">
+            </div>
+            <button class="clear-btn" onclick="clearReportFilters()">✕ Clear</button>
+            <span class="result-count" id="reportCount"></span>
+        </div>
+        </c:if>
         <c:choose>
             <c:when test="${not empty reportHistory}">
                 <div class="card">
@@ -265,7 +284,9 @@
                         </thead>
                         <tbody>
                             <c:forEach var="h" items="${reportHistory}" varStatus="s">
-                                <tr>
+                                <tr data-search="${h.fromDate} ${h.toDate}"
+                                    data-from="${h.fromDate}"
+                                    data-to="${h.toDate}">
                                     <td>${s.index + 1}</td>
                                     <td><strong>${h.fromDate}</strong> → <strong>${h.toDate}</strong></td>
                                     <td>${h.totalReservations}</td>
@@ -297,6 +318,38 @@
     </div>
 
 </div>
+<script>
+function filterReports() {
+    const q = document.getElementById('reportSearch') ? document.getElementById('reportSearch').value.toLowerCase() : '';
+    const from = document.getElementById('reportFrom') ? document.getElementById('reportFrom').value : '';
+    const to = document.getElementById('reportTo') ? document.getElementById('reportTo').value : '';
+    const rows = document.querySelectorAll('#reportHistory tbody tr');
+    let visible = 0;
+    rows.forEach(row => {
+        const text = (row.dataset.search || '').toLowerCase();
+        const rowFrom = row.dataset.from || '';
+        const rowTo = row.dataset.to || '';
+        const show = (!q || text.includes(q)) &&
+                     (!from || rowFrom >= from) &&
+                     (!to || rowTo <= to);
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const cnt = document.getElementById('reportCount');
+    if (cnt) cnt.textContent = visible + ' report' + (visible !== 1 ? 's' : '');
+}
+function clearReportFilters() {
+    if (document.getElementById('reportSearch')) document.getElementById('reportSearch').value = '';
+    if (document.getElementById('reportFrom')) document.getElementById('reportFrom').value = '';
+    if (document.getElementById('reportTo')) document.getElementById('reportTo').value = '';
+    filterReports();
+}
+window.onload = () => {
+    const rows = document.querySelectorAll('#reportHistory tbody tr');
+    const cnt = document.getElementById('reportCount');
+    if (cnt) cnt.textContent = rows.length + ' reports';
+};
+</script>
 </body>
 </html>
 

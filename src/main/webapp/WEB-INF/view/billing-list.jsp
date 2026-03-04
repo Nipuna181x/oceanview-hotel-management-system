@@ -34,6 +34,12 @@
         .empty-state { text-align:center; padding:60px 20px; color:#aaa; }
         .empty-state .icon { font-size:48px; margin-bottom:12px; }
         .total-amount { font-weight:700; color:#0a3d62; }
+        .search-bar { background:white; border-radius:12px; padding:14px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+        .search-bar input, .search-bar select { padding:9px 14px; border:1px solid #d5d8dc; border-radius:8px; font-size:13px; outline:none; }
+        .search-bar input { flex:1; min-width:180px; }
+        .search-bar input:focus, .search-bar select:focus { border-color:#2980b9; }
+        .search-bar .clear-btn { padding:9px 16px; border-radius:8px; border:none; background:#ecf0f1; color:#555; font-size:13px; cursor:pointer; font-weight:600; }
+        .result-count { font-size:12px; color:#888; }
     </style>
 </head>
 <body>
@@ -58,6 +64,24 @@
     <c:if test="${not empty errorMessage}">
         <div class="alert-error">⚠ ${errorMessage}</div>
     </c:if>
+
+    <div class="search-bar">
+        <input type="text" id="billSearch" placeholder="🔍 Search by guest, reservation number, strategy..." oninput="filterBills()">
+        <select id="strategyFilter" onchange="filterBills()">
+            <option value="">All Strategies</option>
+            <option value="Standard">Standard</option>
+            <option value="Seasonal">Seasonal</option>
+            <option value="Long Stay">Long Stay</option>
+        </select>
+        <div>
+            <input type="number" id="minTotal" placeholder="Min Rs." oninput="filterBills()" style="width:110px;">
+        </div>
+        <div>
+            <input type="number" id="maxTotal" placeholder="Max Rs." oninput="filterBills()" style="width:110px;">
+        </div>
+        <button class="clear-btn" onclick="clearBillFilters()">✕ Clear</button>
+        <span class="result-count" id="billCount"></span>
+    </div>
 
     <div class="card">
         <c:choose>
@@ -88,7 +112,9 @@
                     </thead>
                     <tbody>
                         <c:forEach var="bill" items="${bills}">
-                            <tr>
+                            <tr data-search="${bill.reservationNumber} ${bill.guestName} ${bill.pricingStrategyUsed}"
+                                data-strategy="${bill.pricingStrategyUsed}"
+                                data-total="${bill.totalAmount}">
                                 <td>#${bill.billId}</td>
                                 <td><code>${not empty bill.reservationNumber ? bill.reservationNumber : bill.reservationId}</code></td>
                                 <td>${not empty bill.guestName ? bill.guestName : '—'}</td>
@@ -114,6 +140,35 @@
         </c:choose>
     </div>
 </div>
+<script>
+function filterBills() {
+    const q = document.getElementById('billSearch').value.toLowerCase();
+    const strategy = document.getElementById('strategyFilter').value.toLowerCase();
+    const minVal = parseFloat(document.getElementById('minTotal').value) || 0;
+    const maxVal = parseFloat(document.getElementById('maxTotal').value) || Infinity;
+    const rows = document.querySelectorAll('tbody tr');
+    let visible = 0;
+    rows.forEach(row => {
+        const text = (row.dataset.search || '').toLowerCase();
+        const rowStrategy = (row.dataset.strategy || '').toLowerCase();
+        const total = parseFloat(row.dataset.total || 0);
+        const show = (!q || text.includes(q)) &&
+                     (!strategy || rowStrategy.includes(strategy)) &&
+                     total >= minVal && total <= maxVal;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('billCount').textContent = visible + ' bill' + (visible !== 1 ? 's' : '');
+}
+function clearBillFilters() {
+    document.getElementById('billSearch').value = '';
+    document.getElementById('strategyFilter').value = '';
+    document.getElementById('minTotal').value = '';
+    document.getElementById('maxTotal').value = '';
+    filterBills();
+}
+window.onload = () => { const r = document.querySelectorAll('tbody tr'); document.getElementById('billCount').textContent = r.length + ' bills'; };
+</script>
 </body>
 </html>
 

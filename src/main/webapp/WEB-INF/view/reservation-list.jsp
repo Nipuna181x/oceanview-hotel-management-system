@@ -18,6 +18,14 @@
         .top-bar h2 { color:#0a3d62; font-size:22px; }
         .btn-new { background:linear-gradient(135deg,#0a3d62,#2980b9); color:white; text-decoration:none; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; }
         .alert-success { background:#eafaf1; border-left:4px solid #2ecc71; color:#1e8449; padding:12px 16px; border-radius:6px; font-size:13px; margin-bottom:20px; }
+        .search-bar { background:white; border-radius:12px; padding:16px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+        .search-bar input, .search-bar select { padding:9px 14px; border:1px solid #d5d8dc; border-radius:8px; font-size:13px; outline:none; }
+        .search-bar input { flex:1; min-width:200px; }
+        .search-bar input:focus, .search-bar select:focus { border-color:#2980b9; }
+        .search-bar label { font-size:12px; font-weight:700; color:#555; white-space:nowrap; }
+        .search-bar .clear-btn { padding:9px 16px; border-radius:8px; border:none; background:#ecf0f1; color:#555; font-size:13px; cursor:pointer; font-weight:600; }
+        .search-bar .clear-btn:hover { background:#d5d8dc; }
+        .result-count { font-size:12px; color:#888; padding:0 4px; }
         .card { background:white; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.07); overflow:hidden; }
         table { width:100%; border-collapse:collapse; }
         thead { background:#0a3d62; color:white; }
@@ -57,6 +65,32 @@
     <c:if test="${not empty successMessage}">
         <div class="alert-success">✓ ${successMessage}</div>
     </c:if>
+
+    <%-- Search & Filter Bar --%>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Search by guest name, reservation number, room..." oninput="filterTable()">
+        <div>
+            <label>Status</label><br>
+            <select id="statusFilter" onchange="filterTable()">
+                <option value="">All Statuses</option>
+                <option value="CONFIRMED">Confirmed</option>
+                <option value="CHECKED_IN">Checked In</option>
+                <option value="CHECKED_OUT">Checked Out</option>
+                <option value="CANCELLED">Cancelled</option>
+            </select>
+        </div>
+        <div>
+            <label>Check-In From</label><br>
+            <input type="date" id="dateFrom" onchange="filterTable()" style="min-width:0;width:140px;">
+        </div>
+        <div>
+            <label>Check-In To</label><br>
+            <input type="date" id="dateTo" onchange="filterTable()" style="min-width:0;width:140px;">
+        </div>
+        <button class="clear-btn" onclick="clearFilters()">✕ Clear</button>
+        <span class="result-count" id="resultCount"></span>
+    </div>
+
     <div class="card">
         <c:choose>
             <c:when test="${not empty reservations}">
@@ -74,7 +108,9 @@
                     </thead>
                     <tbody>
                         <c:forEach var="res" items="${reservations}">
-                            <tr>
+                            <tr data-search="${res.reservationNumber} ${res.guest.fullName} ${res.room.roomNumber} ${res.room.roomType}"
+                                data-status="${res.status}"
+                                data-checkin="${res.checkInDate}">
                                 <td><strong>${res.reservationNumber}</strong></td>
                                 <td>${res.guest.fullName}</td>
                                 <td>Room ${res.room.roomNumber} (${res.room.roomType})</td>
@@ -107,6 +143,37 @@
         </c:choose>
     </div>
 </div>
+<script>
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    const rows = document.querySelectorAll('tbody tr');
+    let visible = 0;
+    rows.forEach(row => {
+        const text = (row.dataset.search || '').toLowerCase();
+        const rowStatus = row.dataset.status || '';
+        const checkin = row.dataset.checkin || '';
+        const matchText = !q || text.includes(q);
+        const matchStatus = !status || rowStatus === status;
+        const matchFrom = !from || checkin >= from;
+        const matchTo = !to || checkin <= to;
+        const show = matchText && matchStatus && matchFrom && matchTo;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('resultCount').textContent = visible + ' result' + (visible !== 1 ? 's' : '');
+}
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    filterTable();
+}
+window.onload = () => { document.getElementById('resultCount').textContent = document.querySelectorAll('tbody tr').length + ' results'; };
+</script>
 </body>
 </html>
 
