@@ -183,9 +183,9 @@
             </div>
             <div class="rm-grid">
                 <div class="rm-card" style="background:var(--blue-bg);border-color:var(--blue-bd);">
-                    <div class="rm-num" style="color:var(--blue);">${totalRooms - availableRooms}</div>
+                    <div class="rm-num" style="color:var(--blue);">${occupiedRooms}</div>
                     <div class="rm-lbl" style="color:var(--blue);">Occupied</div>
-                    <div class="rm-bar" style="background:var(--blue-bd);"><div class="rm-fill" style="width:${totalRooms > 0 ? (totalRooms - availableRooms) * 100 / totalRooms : 0}%;background:var(--blue);"></div></div>
+                    <div class="rm-bar" style="background:var(--blue-bd);"><div class="rm-fill" style="width:${totalRooms > 0 ? occupiedRooms * 100 / totalRooms : 0}%;background:var(--blue);"></div></div>
                 </div>
                 <div class="rm-card" style="background:var(--emerald-bg);border-color:var(--emerald-bd);">
                     <div class="rm-num" style="color:var(--emerald);">${availableRooms}</div>

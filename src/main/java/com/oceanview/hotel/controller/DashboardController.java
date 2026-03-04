@@ -2,6 +2,7 @@ package com.oceanview.hotel.controller;
 
 import com.oceanview.hotel.dao.*;
 import com.oceanview.hotel.model.Reservation;
+import com.oceanview.hotel.model.Room;
 import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.util.SessionUtil;
 
@@ -29,7 +30,11 @@ public class DashboardController extends HttpServlet {
             ReservationDAO resDAO = new ReservationDAOImpl(DBConnectionFactory.getConnection());
             BillDAO billDAO = new BillDAOImpl(DBConnectionFactory.getConnection());
 
-            int totalRooms = roomDAO.findAll().size();
+            List<Room> allRooms = roomDAO.findAll();
+            int totalRooms = allRooms.size();
+            long availableRooms = allRooms.stream().filter(Room::isAvailable).count();
+            long occupiedRooms = totalRooms - availableRooms;
+
             List<Reservation> allRes = resDAO.findAll();
             long active = allRes.stream().filter(r ->
                 r.getStatus() == Reservation.Status.CONFIRMED || r.getStatus() == Reservation.Status.CHECKED_IN
@@ -38,6 +43,8 @@ public class DashboardController extends HttpServlet {
             int totalBills = billDAO.findAll().size();
 
             request.setAttribute("totalRooms", totalRooms);
+            request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("occupiedRooms", occupiedRooms);
             request.setAttribute("activeReservations", active);
             request.setAttribute("pendingCheckins", pending);
             request.setAttribute("totalBills", totalBills);
