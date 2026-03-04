@@ -149,10 +149,10 @@
             <p>Check room availability and manage room details.</p>
         </a>
 
-        <a href="${pageContext.request.contextPath}/billing" class="card card-purple">
+        <a href="${pageContext.request.contextPath}/billing/" class="card card-purple">
             <div class="icon">💳</div>
             <h3>Billing</h3>
-            <p>Generate and view bills for completed reservations.</p>
+            <p>View bill history and generate invoices for reservations.</p>
         </a>
 
         <a href="${pageContext.request.contextPath}/reports" class="card card-teal">
