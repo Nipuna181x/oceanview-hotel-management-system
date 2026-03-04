@@ -88,7 +88,7 @@
                    class="btn btn-primary">⬆ Check Out</a>
             </c:if>
             <c:if test="${reservation.status == 'CHECKED_IN' || reservation.status == 'CHECKED_OUT'}">
-                <a href="${pageContext.request.contextPath}/billing?reservationId=${reservation.reservationId}"
+                <a href="${pageContext.request.contextPath}/billing/for-reservation?reservationId=${reservation.reservationId}"
                    class="btn btn-primary">💳 View / Generate Bill</a>
             </c:if>
             <c:if test="${reservation.status == 'CONFIRMED' || reservation.status == 'CHECKED_IN'}">

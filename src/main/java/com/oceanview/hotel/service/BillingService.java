@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class encapsulating all billing business logic.
@@ -118,6 +119,19 @@ public class BillingService {
             throw new BillNotFoundException("No bill found with ID: " + billId);
         }
         return bill;
+    }
+
+    /**
+     * Returns all reservations that are eligible for billing (CHECKED_IN or CHECKED_OUT)
+     * but do not yet have a bill generated.
+     */
+    public List<Reservation> getUnbilledReservations() {
+        List<Reservation> all = reservationDAO.findAll();
+        return all.stream()
+                .filter(r -> r.getStatus() == Reservation.Status.CHECKED_IN
+                          || r.getStatus() == Reservation.Status.CHECKED_OUT)
+                .filter(r -> billDAO.findByReservationId(r.getReservationId()) == null)
+                .collect(Collectors.toList());
     }
 
     /**
