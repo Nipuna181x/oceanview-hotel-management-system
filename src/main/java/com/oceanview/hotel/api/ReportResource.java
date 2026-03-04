@@ -1,6 +1,8 @@
 package com.oceanview.hotel.api;
 
+import com.oceanview.hotel.dao.BillDAOImpl;
 import com.oceanview.hotel.dao.DBConnectionFactory;
+import com.oceanview.hotel.dao.ReportHistoryDAOImpl;
 import com.oceanview.hotel.dao.ReservationDAOImpl;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.service.ReportService;
@@ -27,7 +29,9 @@ public class ReportResource {
 
     public ReportResource() {
         this.reportService = new ReportService(
-                new ReservationDAOImpl(DBConnectionFactory.getConnection())
+                new ReservationDAOImpl(DBConnectionFactory.getConnection()),
+                new BillDAOImpl(DBConnectionFactory.getConnection()),
+                new ReportHistoryDAOImpl(DBConnectionFactory.getConnection())
         );
     }
 

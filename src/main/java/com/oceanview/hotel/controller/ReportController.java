@@ -1,9 +1,11 @@
 package com.oceanview.hotel.controller;
 
-import com.oceanview.hotel.dao.DBConnectionFactory;
-import com.oceanview.hotel.dao.ReservationDAOImpl;
+import com.oceanview.hotel.dao.*;
+import com.oceanview.hotel.model.ReportHistory;
 import com.oceanview.hotel.model.Reservation;
+import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.ReportService;
+import com.oceanview.hotel.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,7 +28,9 @@ public class ReportController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         reportService = new ReportService(
-                new ReservationDAOImpl(DBConnectionFactory.getConnection())
+                new ReservationDAOImpl(DBConnectionFactory.getConnection()),
+                new BillDAOImpl(DBConnectionFactory.getConnection()),
+                new ReportHistoryDAOImpl(DBConnectionFactory.getConnection())
         );
     }
 
@@ -36,6 +40,10 @@ public class ReportController extends HttpServlet {
 
         String from = request.getParameter("from");
         String to   = request.getParameter("to");
+
+        // Always load report history
+        List<ReportHistory> history = reportService.getReportHistory();
+        request.setAttribute("reportHistory", history);
 
         if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
             try {
@@ -47,6 +55,15 @@ public class ReportController extends HttpServlet {
 
                 request.setAttribute("reservations", reservations);
                 request.setAttribute("summary", summary);
+
+                // Save this report to history
+                User user = SessionUtil.getLoggedInUser(request);
+                int generatedBy = (user != null) ? user.getUserId() : 1;
+                reportService.saveReportHistory(summary, startDate, endDate, generatedBy);
+
+                // Reload history after save so the new entry shows immediately
+                request.setAttribute("reportHistory", reportService.getReportHistory());
+
             } catch (IllegalArgumentException e) {
                 request.setAttribute("errorMessage", e.getMessage());
             }
