@@ -83,18 +83,24 @@ public class RoomService {
     /**
      * Add a new room. Admin only.
      *
-     * @param roomNumber  unique room number (e.g. "101")
-     * @param roomType    type of the room
-     * @param ratePerNight nightly rate (must be > 0)
+     * @param roomNumber   unique room number (e.g. "101")
+     * @param roomType     type of the room
+     * @param maxOccupancy maximum number of guests
+     * @param ratePerNight nightly rate in Rs (must be > 0)
+     * @param description  optional room description
+     * @param available    initial availability status
      * @return true if saved successfully
      * @throws IllegalArgumentException if validation fails or room number taken
      */
-    public boolean addRoom(String roomNumber, Room.RoomType roomType, double ratePerNight) {
+    public boolean addRoom(String roomNumber, Room.RoomType roomType, int maxOccupancy, double ratePerNight, String description, boolean available) {
         if (roomNumber == null || roomNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Room number cannot be blank");
         }
         if (ratePerNight <= 0) {
             throw new IllegalArgumentException("Rate per night must be greater than zero");
+        }
+        if (maxOccupancy <= 0) {
+            throw new IllegalArgumentException("Max occupancy must be greater than zero");
         }
         if (roomDAO.findByRoomNumber(roomNumber.trim()) != null) {
             throw new IllegalArgumentException("Room number already exists: " + roomNumber);
@@ -103,30 +109,52 @@ public class RoomService {
         Room room = new Room();
         room.setRoomNumber(roomNumber.trim());
         room.setRoomType(roomType);
+        room.setMaxOccupancy(maxOccupancy);
         room.setRatePerNight(ratePerNight);
-        room.setAvailable(true);
+        room.setDescription(description);
+        room.setAvailable(available);
         return roomDAO.save(room);
+    }
+
+    /** Legacy addRoom for backward compatibility */
+    public boolean addRoom(String roomNumber, Room.RoomType roomType, double ratePerNight) {
+        return addRoom(roomNumber, roomType, 2, ratePerNight, null, true);
     }
 
     /**
      * Update an existing room's details. Admin only.
      *
-     * @param roomId      ID of the room to update
-     * @param roomNumber  new room number
-     * @param roomType    new room type
-     * @param ratePerNight new nightly rate
+     * @param roomId       ID of the room to update
+     * @param roomNumber   new room number
+     * @param roomType     new room type
+     * @param maxOccupancy new max occupancy
+     * @param ratePerNight new nightly rate in Rs
+     * @param description  new description
+     * @param available    new availability status
      * @return true if updated successfully
      * @throws IllegalArgumentException if room not found
      */
-    public boolean updateRoom(int roomId, String roomNumber, Room.RoomType roomType, double ratePerNight) {
+    public boolean updateRoom(int roomId, String roomNumber, Room.RoomType roomType, int maxOccupancy, double ratePerNight, String description, boolean available) {
         Room room = roomDAO.findById(roomId);
         if (room == null) {
             throw new IllegalArgumentException("Room not found with ID: " + roomId);
         }
         room.setRoomNumber(roomNumber != null ? roomNumber.trim() : room.getRoomNumber());
         room.setRoomType(roomType);
+        room.setMaxOccupancy(maxOccupancy);
         room.setRatePerNight(ratePerNight);
+        room.setDescription(description);
+        room.setAvailable(available);
         return roomDAO.update(room);
+    }
+
+    /** Legacy updateRoom for backward compatibility */
+    public boolean updateRoom(int roomId, String roomNumber, Room.RoomType roomType, double ratePerNight) {
+        Room existing = roomDAO.findById(roomId);
+        boolean avail = existing != null && existing.isAvailable();
+        int occ = existing != null ? existing.getMaxOccupancy() : 2;
+        String desc = existing != null ? existing.getDescription() : null;
+        return updateRoom(roomId, roomNumber, roomType, occ, ratePerNight, desc, avail);
     }
 
     /**

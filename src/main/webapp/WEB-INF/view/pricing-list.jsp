@@ -96,7 +96,7 @@
                                 <td>${s.index + 1}</td>
                                 <td><span class="badge badge-${rate.roomType.toString().toLowerCase()}">${rate.roomType}</span></td>
                                 <td><span class="badge badge-season">${rate.season}</span></td>
-                                <td class="rate-value">$${rate.ratePerNight}</td>
+                                <td class="rate-value">Rs. ${rate.ratePerNight}</td>
                                 <td>${not empty rate.description ? rate.description : '—'}</td>
                                 <td style="font-size:12px;color:#888;">${rate.createdAt}</td>
                                 <td>

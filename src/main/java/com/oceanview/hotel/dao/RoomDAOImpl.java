@@ -87,12 +87,14 @@ public class RoomDAOImpl implements RoomDAO {
 
     @Override
     public boolean save(Room room) {
-        String sql = "INSERT INTO rooms (room_number, room_type, rate_per_night, is_available) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO rooms (room_number, room_type, max_occupancy, rate_per_night, description, is_available) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, room.getRoomNumber());
             stmt.setString(2, room.getRoomType().name());
-            stmt.setDouble(3, room.getRatePerNight());
-            stmt.setBoolean(4, room.isAvailable());
+            stmt.setInt(3, room.getMaxOccupancy());
+            stmt.setDouble(4, room.getRatePerNight());
+            stmt.setString(5, room.getDescription());
+            stmt.setBoolean(6, room.isAvailable());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,13 +104,15 @@ public class RoomDAOImpl implements RoomDAO {
 
     @Override
     public boolean update(Room room) {
-        String sql = "UPDATE rooms SET room_number=?, room_type=?, rate_per_night=?, is_available=? WHERE room_id=?";
+        String sql = "UPDATE rooms SET room_number=?, room_type=?, max_occupancy=?, rate_per_night=?, description=?, is_available=? WHERE room_id=?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, room.getRoomNumber());
             stmt.setString(2, room.getRoomType().name());
-            stmt.setDouble(3, room.getRatePerNight());
-            stmt.setBoolean(4, room.isAvailable());
-            stmt.setInt(5, room.getRoomId());
+            stmt.setInt(3, room.getMaxOccupancy());
+            stmt.setDouble(4, room.getRatePerNight());
+            stmt.setString(5, room.getDescription());
+            stmt.setBoolean(6, room.isAvailable());
+            stmt.setInt(7, room.getRoomId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -133,7 +137,9 @@ public class RoomDAOImpl implements RoomDAO {
         room.setRoomId(rs.getInt("room_id"));
         room.setRoomNumber(rs.getString("room_number"));
         room.setRoomType(Room.RoomType.valueOf(rs.getString("room_type")));
+        room.setMaxOccupancy(rs.getInt("max_occupancy"));
         room.setRatePerNight(rs.getDouble("rate_per_night"));
+        room.setDescription(rs.getString("description"));
         room.setAvailable(rs.getBoolean("is_available"));
         return room;
     }

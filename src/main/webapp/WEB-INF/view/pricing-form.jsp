@@ -81,7 +81,7 @@
             </div>
 
             <div class="form-group">
-                <label for="ratePerNight">Rate Per Night ($) *</label>
+                <label for="ratePerNight">Rate Per Night (Rs.) *</label>
                 <input type="number" id="ratePerNight" name="ratePerNight"
                        value="${not empty rate ? rate.ratePerNight : ''}"
                        required min="1" step="0.01" placeholder="e.g. 120.00"/>

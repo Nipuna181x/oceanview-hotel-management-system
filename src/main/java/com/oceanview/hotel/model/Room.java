@@ -12,18 +12,27 @@ public class Room {
     private int roomId;
     private String roomNumber;
     private RoomType roomType;
+    private int maxOccupancy;
     private double ratePerNight;
+    private String description;
     private boolean available;
 
     public Room() {
     }
 
-    public Room(int roomId, String roomNumber, RoomType roomType, double ratePerNight, boolean available) {
+    public Room(int roomId, String roomNumber, RoomType roomType, int maxOccupancy, double ratePerNight, String description, boolean available) {
         this.roomId = roomId;
         this.roomNumber = roomNumber;
         this.roomType = roomType;
+        this.maxOccupancy = maxOccupancy;
         this.ratePerNight = ratePerNight;
+        this.description = description;
         this.available = available;
+    }
+
+    /** Legacy constructor for backward compatibility */
+    public Room(int roomId, String roomNumber, RoomType roomType, double ratePerNight, boolean available) {
+        this(roomId, roomNumber, roomType, 2, ratePerNight, null, available);
     }
 
     public int getRoomId() {
@@ -50,12 +59,28 @@ public class Room {
         this.roomType = roomType;
     }
 
+    public int getMaxOccupancy() {
+        return maxOccupancy;
+    }
+
+    public void setMaxOccupancy(int maxOccupancy) {
+        this.maxOccupancy = maxOccupancy;
+    }
+
     public double getRatePerNight() {
         return ratePerNight;
     }
 
     public void setRatePerNight(double ratePerNight) {
         this.ratePerNight = ratePerNight;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isAvailable() {
@@ -72,7 +97,9 @@ public class Room {
                 "roomId=" + roomId +
                 ", roomNumber='" + roomNumber + '\'' +
                 ", roomType=" + roomType +
+                ", maxOccupancy=" + maxOccupancy +
                 ", ratePerNight=" + ratePerNight +
+                ", description='" + description + '\'' +
                 ", available=" + available +
                 '}';
     }

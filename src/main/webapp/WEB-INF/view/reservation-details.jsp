@@ -72,7 +72,7 @@
         <div class="detail-grid" style="margin-bottom:24px;">
             <div class="detail-item"><label>Room Number</label><span>${reservation.room.roomNumber}</span></div>
             <div class="detail-item"><label>Room Type</label><span>${reservation.room.roomType}</span></div>
-            <div class="detail-item"><label>Rate Per Night</label><span>$${reservation.room.ratePerNight}</span></div>
+            <div class="detail-item"><label>Rate Per Night</label><span>Rs. ${reservation.room.ratePerNight}</span></div>
             <div class="detail-item"><label>Check-In Date</label><span>${reservation.checkInDate}</span></div>
             <div class="detail-item"><label>Check-Out Date</label><span>${reservation.checkOutDate}</span></div>
             <div class="detail-item"><label>Created At</label><span>${reservation.createdAt}</span></div>

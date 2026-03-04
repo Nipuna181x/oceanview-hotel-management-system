@@ -131,7 +131,7 @@
                         <option value="">-- Select Available Room --</option>
                         <c:forEach var="room" items="${availableRooms}">
                             <option value="${room.roomId}">
-                                Room ${room.roomNumber} — ${room.roomType} ($${room.ratePerNight}/night)
+                                Room ${room.roomNumber} — ${room.roomType} (Rs. ${room.ratePerNight}/night)
                             </option>
                         </c:forEach>
                     </select>

@@ -93,15 +93,15 @@
                                 <td><code>${not empty bill.reservationNumber ? bill.reservationNumber : bill.reservationId}</code></td>
                                 <td>${not empty bill.guestName ? bill.guestName : '—'}</td>
                                 <td>${bill.numNights}</td>
-                                <td>$${bill.ratePerNight}</td>
+                                <td>Rs. ${bill.ratePerNight}</td>
                                 <td>
                                     <span class="badge badge-${bill.pricingStrategyUsed.toLowerCase()}">
                                         ${bill.pricingStrategyUsed}
                                     </span>
                                 </td>
-                                <td>$${bill.subtotal}</td>
-                                <td>$${bill.taxAmount}</td>
-                                <td class="total-amount">$${bill.totalAmount}</td>
+                                <td>Rs. ${bill.subtotal}</td>
+                                <td>Rs. ${bill.taxAmount}</td>
+                                <td class="total-amount">Rs. ${bill.totalAmount}</td>
                                 <td style="font-size:12px;color:#888;">${bill.generatedAt}</td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/billing/view?billId=${bill.billId}" class="btn btn-view">👁 View</a>

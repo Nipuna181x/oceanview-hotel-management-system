@@ -100,11 +100,16 @@ public class RoomController extends HttpServlet {
         if ("create".equals(action)) {
             String roomNumber = request.getParameter("roomNumber");
             String roomTypeStr = request.getParameter("roomType");
+            String maxOccStr = request.getParameter("maxOccupancy");
             String rateStr = request.getParameter("ratePerNight");
+            String description = request.getParameter("description");
+            String availStr = request.getParameter("available");
             try {
                 Room.RoomType roomType = Room.RoomType.valueOf(roomTypeStr.toUpperCase());
+                int maxOcc = Integer.parseInt(maxOccStr);
                 double rate = Double.parseDouble(rateStr);
-                roomService.addRoom(roomNumber, roomType, rate);
+                boolean available = "true".equals(availStr);
+                roomService.addRoom(roomNumber, roomType, maxOcc, rate, description, available);
                 request.getSession().setAttribute("successMessage", "Room " + roomNumber + " added successfully.");
                 response.sendRedirect(request.getContextPath() + "/rooms");
             } catch (IllegalArgumentException e) {
@@ -116,12 +121,17 @@ public class RoomController extends HttpServlet {
             String idStr = request.getParameter("roomId");
             String roomNumber = request.getParameter("roomNumber");
             String roomTypeStr = request.getParameter("roomType");
+            String maxOccStr = request.getParameter("maxOccupancy");
             String rateStr = request.getParameter("ratePerNight");
+            String description = request.getParameter("description");
+            String availStr = request.getParameter("available");
             try {
                 int id = Integer.parseInt(idStr);
                 Room.RoomType roomType = Room.RoomType.valueOf(roomTypeStr.toUpperCase());
+                int maxOcc = Integer.parseInt(maxOccStr);
                 double rate = Double.parseDouble(rateStr);
-                roomService.updateRoom(id, roomNumber, roomType, rate);
+                boolean available = "true".equals(availStr);
+                roomService.updateRoom(id, roomNumber, roomType, maxOcc, rate, description, available);
                 request.getSession().setAttribute("successMessage", "Room updated successfully.");
                 response.sendRedirect(request.getContextPath() + "/rooms");
             } catch (Exception e) {

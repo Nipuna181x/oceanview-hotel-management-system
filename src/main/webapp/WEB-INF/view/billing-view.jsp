@@ -78,15 +78,15 @@
             <div class="bill-row"><span>Check-In Date</span><span>${reservation.checkInDate}</span></div>
             <div class="bill-row"><span>Check-Out Date</span><span>${reservation.checkOutDate}</span></div>
             <div class="bill-row"><span>Number of Nights</span><span>${bill.numNights}</span></div>
-            <div class="bill-row"><span>Rate Per Night</span><span>$${bill.ratePerNight}</span></div>
+            <div class="bill-row"><span>Rate Per Night</span><span>Rs. ${bill.ratePerNight}</span></div>
             <div class="bill-row"><span>Pricing Strategy</span><span><span class="strategy-badge">${bill.pricingStrategyUsed}</span></span></div>
         </div>
 
         <div class="bill-section">
             <h4>Charges</h4>
-            <div class="bill-row"><span>Subtotal</span><span>$${bill.subtotal}</span></div>
-            <div class="bill-row tax"><span>Tax (10%)</span><span>$${bill.taxAmount}</span></div>
-            <div class="bill-row total"><span>TOTAL DUE</span><span>$${bill.totalAmount}</span></div>
+            <div class="bill-row"><span>Subtotal</span><span>Rs. ${bill.subtotal}</span></div>
+            <div class="bill-row tax"><span>Tax (10%)</span><span>Rs. ${bill.taxAmount}</span></div>
+            <div class="bill-row total"><span>TOTAL DUE</span><span>Rs. ${bill.totalAmount}</span></div>
         </div>
 
         <div style="margin-top:28px; display:flex; gap:12px;">

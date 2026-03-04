@@ -25,8 +25,10 @@
         .room-card .room-icon { font-size:36px; margin-bottom:12px; }
         .room-card .room-number { font-size:20px; font-weight:800; color:#0a3d62; }
         .room-card .room-type { font-size:13px; color:#7f8c8d; margin:4px 0 12px; text-transform:uppercase; letter-spacing:0.5px; }
-        .room-card .rate { font-size:22px; font-weight:700; color:#2980b9; }
+        .room-card .rate { font-size:20px; font-weight:700; color:#2980b9; }
         .room-card .rate span { font-size:13px; color:#aaa; font-weight:400; }
+        .room-card .occupancy { font-size:12px; color:#7f8c8d; margin:4px 0; }
+        .room-card .description { font-size:12px; color:#95a5a6; margin:6px 0; line-height:1.5; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
         .avail-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; margin-top:12px; }
         .avail-yes { background:#eafaf1; color:#1e8449; }
         .avail-no  { background:#fdecea; color:#c0392b; }
@@ -95,7 +97,11 @@
                 </div>
                 <div class="room-number">Room ${room.roomNumber}</div>
                 <div class="room-type">${room.roomType}</div>
-                <div class="rate">$${room.ratePerNight}<span>/night</span></div>
+                <div class="occupancy">👥 Max Occupancy: ${room.maxOccupancy}</div>
+                <div class="rate">Rs. ${room.ratePerNight}<span>/night</span></div>
+                <c:if test="${not empty room.description}">
+                    <div class="description">${room.description}</div>
+                </c:if>
                 <div>
                     <span class="avail-badge ${room.available ? 'avail-yes' : 'avail-no'}">
                         ${room.available ? '✓ Available' : '✗ Occupied'}
