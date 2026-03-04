@@ -180,5 +180,106 @@ class RoomServiceTest {
     void givenNullType_whenGetRateByType_thenThrowException() {
         assertThrows(IllegalArgumentException.class, () -> roomService.getRateByType(null));
     }
+
+    // ================================================================
+    // ADD ROOM (Admin only)
+    // ================================================================
+
+    @Test
+    @DisplayName("Given valid room details, When addRoom, Then room is saved successfully")
+    void givenValidDetails_whenAddRoom_thenSaveSucceeds() {
+        when(roomDAO.findByRoomNumber("501")).thenReturn(null);
+        when(roomDAO.save(any(Room.class))).thenReturn(true);
+
+        boolean result = roomService.addRoom("501", Room.RoomType.SUITE, 250.00);
+
+        assertTrue(result);
+        verify(roomDAO, times(1)).save(any(Room.class));
+    }
+
+    @Test
+    @DisplayName("Given duplicate room number, When addRoom, Then throw IllegalArgumentException")
+    void givenDuplicateRoomNumber_whenAddRoom_thenThrowException() {
+        when(roomDAO.findByRoomNumber("101")).thenReturn(singleAvailable);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.addRoom("101", Room.RoomType.SINGLE, 75.00));
+
+        verify(roomDAO, never()).save(any(Room.class));
+    }
+
+    @Test
+    @DisplayName("Given blank room number, When addRoom, Then throw IllegalArgumentException")
+    void givenBlankRoomNumber_whenAddRoom_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.addRoom("", Room.RoomType.SINGLE, 75.00));
+    }
+
+    @Test
+    @DisplayName("Given negative rate, When addRoom, Then throw IllegalArgumentException")
+    void givenNegativeRate_whenAddRoom_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.addRoom("502", Room.RoomType.SINGLE, -10.00));
+    }
+
+    // ================================================================
+    // UPDATE ROOM (Admin only)
+    // ================================================================
+
+    @Test
+    @DisplayName("Given valid room ID, When updateRoom, Then update succeeds")
+    void givenValidId_whenUpdateRoom_thenUpdateSucceeds() {
+        when(roomDAO.findById(1)).thenReturn(singleAvailable);
+        when(roomDAO.update(any(Room.class))).thenReturn(true);
+
+        boolean result = roomService.updateRoom(1, "101", Room.RoomType.SINGLE, 80.00);
+
+        assertTrue(result);
+        verify(roomDAO, times(1)).update(any(Room.class));
+    }
+
+    @Test
+    @DisplayName("Given non-existent room ID, When updateRoom, Then throw IllegalArgumentException")
+    void givenNonExistentId_whenUpdateRoom_thenThrowException() {
+        when(roomDAO.findById(99)).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.updateRoom(99, "999", Room.RoomType.SINGLE, 75.00));
+    }
+
+    // ================================================================
+    // DELETE ROOM (Admin only)
+    // ================================================================
+
+    @Test
+    @DisplayName("Given valid room ID, When deleteRoom, Then delete succeeds")
+    void givenValidId_whenDeleteRoom_thenDeleteSucceeds() {
+        when(roomDAO.findById(1)).thenReturn(singleAvailable);
+        when(roomDAO.delete(1)).thenReturn(true);
+
+        boolean result = roomService.deleteRoom(1);
+
+        assertTrue(result);
+        verify(roomDAO, times(1)).delete(1);
+    }
+
+    @Test
+    @DisplayName("Given non-existent room ID, When deleteRoom, Then throw IllegalArgumentException")
+    void givenNonExistentId_whenDeleteRoom_thenThrowException() {
+        when(roomDAO.findById(99)).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.deleteRoom(99));
+    }
+
+    @Test
+    @DisplayName("Given occupied room, When deleteRoom, Then throw IllegalArgumentException")
+    void givenOccupiedRoom_whenDeleteRoom_thenThrowException() {
+        when(roomDAO.findById(3)).thenReturn(suiteUnavailable);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                roomService.deleteRoom(3));
+    }
 }
+
 

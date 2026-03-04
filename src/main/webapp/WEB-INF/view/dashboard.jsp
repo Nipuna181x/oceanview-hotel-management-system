@@ -143,10 +143,10 @@
             <p>View and manage all existing reservations.</p>
         </a>
 
-        <a href="${pageContext.request.contextPath}/rooms" class="card card-orange">
+        <a href="${pageContext.request.contextPath}/rooms/" class="card card-orange">
             <div class="icon">🛏️</div>
             <h3>Room Management</h3>
-            <p>Check room availability and manage room details.</p>
+            <p>Check availability. Admins can add, edit and delete rooms.</p>
         </a>
 
         <a href="${pageContext.request.contextPath}/billing/" class="card card-purple">

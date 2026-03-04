@@ -85,6 +85,49 @@ public class RoomDAOImpl implements RoomDAO {
         return false;
     }
 
+    @Override
+    public boolean save(Room room) {
+        String sql = "INSERT INTO rooms (room_number, room_type, rate_per_night, is_available) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, room.getRoomNumber());
+            stmt.setString(2, room.getRoomType().name());
+            stmt.setDouble(3, room.getRatePerNight());
+            stmt.setBoolean(4, room.isAvailable());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean update(Room room) {
+        String sql = "UPDATE rooms SET room_number=?, room_type=?, rate_per_night=?, is_available=? WHERE room_id=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, room.getRoomNumber());
+            stmt.setString(2, room.getRoomType().name());
+            stmt.setDouble(3, room.getRatePerNight());
+            stmt.setBoolean(4, room.isAvailable());
+            stmt.setInt(5, room.getRoomId());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean delete(int roomId) {
+        String sql = "DELETE FROM rooms WHERE room_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, roomId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Room mapRowToRoom(ResultSet rs) throws SQLException {
         Room room = new Room();
         room.setRoomId(rs.getInt("room_id"));

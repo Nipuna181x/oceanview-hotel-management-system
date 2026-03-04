@@ -79,5 +79,73 @@ public class RoomService {
             default: throw new IllegalArgumentException("Unknown room type: " + roomType);
         }
     }
+
+    /**
+     * Add a new room. Admin only.
+     *
+     * @param roomNumber  unique room number (e.g. "101")
+     * @param roomType    type of the room
+     * @param ratePerNight nightly rate (must be > 0)
+     * @return true if saved successfully
+     * @throws IllegalArgumentException if validation fails or room number taken
+     */
+    public boolean addRoom(String roomNumber, Room.RoomType roomType, double ratePerNight) {
+        if (roomNumber == null || roomNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Room number cannot be blank");
+        }
+        if (ratePerNight <= 0) {
+            throw new IllegalArgumentException("Rate per night must be greater than zero");
+        }
+        if (roomDAO.findByRoomNumber(roomNumber.trim()) != null) {
+            throw new IllegalArgumentException("Room number already exists: " + roomNumber);
+        }
+
+        Room room = new Room();
+        room.setRoomNumber(roomNumber.trim());
+        room.setRoomType(roomType);
+        room.setRatePerNight(ratePerNight);
+        room.setAvailable(true);
+        return roomDAO.save(room);
+    }
+
+    /**
+     * Update an existing room's details. Admin only.
+     *
+     * @param roomId      ID of the room to update
+     * @param roomNumber  new room number
+     * @param roomType    new room type
+     * @param ratePerNight new nightly rate
+     * @return true if updated successfully
+     * @throws IllegalArgumentException if room not found
+     */
+    public boolean updateRoom(int roomId, String roomNumber, Room.RoomType roomType, double ratePerNight) {
+        Room room = roomDAO.findById(roomId);
+        if (room == null) {
+            throw new IllegalArgumentException("Room not found with ID: " + roomId);
+        }
+        room.setRoomNumber(roomNumber != null ? roomNumber.trim() : room.getRoomNumber());
+        room.setRoomType(roomType);
+        room.setRatePerNight(ratePerNight);
+        return roomDAO.update(room);
+    }
+
+    /**
+     * Delete a room by ID. Admin only.
+     * Cannot delete occupied (unavailable) rooms.
+     *
+     * @param roomId ID of the room to delete
+     * @return true if deleted successfully
+     * @throws IllegalArgumentException if room not found or currently occupied
+     */
+    public boolean deleteRoom(int roomId) {
+        Room room = roomDAO.findById(roomId);
+        if (room == null) {
+            throw new IllegalArgumentException("Room not found with ID: " + roomId);
+        }
+        if (!room.isAvailable()) {
+            throw new IllegalArgumentException("Cannot delete room " + room.getRoomNumber() + " — it is currently occupied");
+        }
+        return roomDAO.delete(roomId);
+    }
 }
 
