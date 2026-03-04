@@ -10,5 +10,7 @@ import java.util.List;
 public interface ReportHistoryDAO {
     int save(ReportHistory report);
     List<ReportHistory> findAll();
+    ReportHistory findById(int reportId);
+    boolean delete(int reportId);
 }
 

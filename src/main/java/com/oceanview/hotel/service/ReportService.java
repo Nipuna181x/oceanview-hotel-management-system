@@ -113,6 +113,25 @@ public class ReportService {
     }
 
     /**
+     * Get a single report history entry by ID.
+     * @throws IllegalArgumentException if not found
+     */
+    public ReportHistory getReportById(int reportId) {
+        ReportHistory rh = reportHistoryDAO.findById(reportId);
+        if (rh == null) throw new IllegalArgumentException("Report not found with ID: " + reportId);
+        return rh;
+    }
+
+    /**
+     * Delete a report history entry by ID. Admin only.
+     * @throws IllegalArgumentException if not found
+     */
+    public void deleteReport(int reportId) {
+        getReportById(reportId); // validate exists
+        reportHistoryDAO.delete(reportId);
+    }
+
+    /**
      * Get all active (non-cancelled) reservations.
      */
     public List<Reservation> getActiveReservations() {

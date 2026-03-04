@@ -55,7 +55,12 @@
         .empty-state { text-align:center; padding:40px; color:#aaa; }
         .alert-error { background:#fdecea; border-left:4px solid #e74c3c; color:#c0392b; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
         .section-divider { font-size:16px; font-weight:700; color:#0a3d62; margin:32px 0 16px; padding-bottom:8px; border-bottom:2px solid #eaf4fb; }
-        .history-badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700; background:#eaf4fb; color:#1e6091; }
+        .btn-sm { padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-block; }
+        .btn-view   { background:#eaf4fb; color:#1e6091; }
+        .btn-view:hover { background:#d0eaf8; }
+        .btn-delete { background:#fdecea; color:#c0392b; }
+        .btn-delete:hover { background:#fbd4d0; }
+        .alert-success { background:#eafaf1; border-left:4px solid #27ae60; color:#1e8449; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
 
         /* ── Print styles ── */
         @media print {
@@ -104,6 +109,9 @@
 
     <c:if test="${not empty errorMessage}">
         <div class="alert-error no-print">⚠ ${errorMessage}</div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="alert-success no-print">✓ ${successMessage}</div>
     </c:if>
 
     <%-- Filter Form --%>
@@ -252,6 +260,7 @@
                                 <th>Cancelled</th>
                                 <th>Revenue Earned</th>
                                 <th>Generated At</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -267,6 +276,14 @@
                                         Rs. <fmt:formatNumber value="${h.totalRevenue}" pattern="#,##0.00"/>
                                     </td>
                                     <td style="font-size:12px;color:#7f8c8d;">${h.generatedAt}</td>
+                                    <td style="white-space:nowrap;">
+                                        <a href="${pageContext.request.contextPath}/reports/view?id=${h.reportId}"
+                                           class="btn-sm btn-view">👁 View</a>
+                                        &nbsp;
+                                        <a href="${pageContext.request.contextPath}/reports/delete?id=${h.reportId}"
+                                           class="btn-sm btn-delete"
+                                           onclick="return confirm('Delete this report? This cannot be undone.')">🗑 Delete</a>
+                                    </td>
                                 </tr>
                             </c:forEach>
                         </tbody>

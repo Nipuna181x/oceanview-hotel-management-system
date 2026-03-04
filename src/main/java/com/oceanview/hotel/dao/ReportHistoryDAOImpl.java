@@ -72,5 +72,46 @@ public class ReportHistoryDAOImpl implements ReportHistoryDAO {
         }
         return list;
     }
+
+    @Override
+    public ReportHistory findById(int reportId) {
+        String sql = "SELECT * FROM report_history WHERE report_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, reportId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                ReportHistory rh = new ReportHistory();
+                rh.setReportId(rs.getInt("report_id"));
+                rh.setReportType(rs.getString("report_type"));
+                rh.setFromDate(rs.getDate("from_date").toLocalDate());
+                rh.setToDate(rs.getDate("to_date").toLocalDate());
+                rh.setTotalReservations(rs.getInt("total_reservations"));
+                rh.setConfirmedCount(rs.getInt("confirmed_count"));
+                rh.setCheckedInCount(rs.getInt("checked_in_count"));
+                rh.setCheckedOutCount(rs.getInt("checked_out_count"));
+                rh.setCancelledCount(rs.getInt("cancelled_count"));
+                rh.setTotalRevenue(rs.getDouble("total_revenue"));
+                rh.setGeneratedBy(rs.getInt("generated_by"));
+                Timestamp ts2 = rs.getTimestamp("generated_at");
+                if (ts2 != null) rh.setGeneratedAt(ts2.toLocalDateTime());
+                return rh;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean delete(int reportId) {
+        String sql = "DELETE FROM report_history WHERE report_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, reportId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
 

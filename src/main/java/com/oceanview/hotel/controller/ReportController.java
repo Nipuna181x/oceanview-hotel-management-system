@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Servlet controller for reports.
  */
-@WebServlet("/reports")
+@WebServlet(urlPatterns = {"/reports", "/reports/*"})
 public class ReportController extends HttpServlet {
 
     private ReportService reportService;
@@ -38,12 +38,49 @@ public class ReportController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String pathInfo = request.getPathInfo(); // null, "/view", "/delete"
+
+        // ── VIEW a saved report ──
+        if ("/view".equals(pathInfo)) {
+            String idStr = request.getParameter("id");
+            try {
+                int reportId = Integer.parseInt(idStr);
+                ReportHistory report = reportService.getReportById(reportId);
+                request.setAttribute("report", report);
+                request.getRequestDispatcher("/WEB-INF/view/report-view.jsp").forward(request, response);
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage", "Report not found.");
+                response.sendRedirect(request.getContextPath() + "/reports");
+            }
+            return;
+        }
+
+        // ── DELETE a saved report ──
+        if ("/delete".equals(pathInfo)) {
+            String idStr = request.getParameter("id");
+            try {
+                int reportId = Integer.parseInt(idStr);
+                reportService.deleteReport(reportId);
+                request.getSession().setAttribute("successMessage", "Report deleted successfully.");
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage", "Could not delete report: " + e.getMessage());
+            }
+            response.sendRedirect(request.getContextPath() + "/reports");
+            return;
+        }
+
+        // ── MAIN reports page ──
         String from = request.getParameter("from");
         String to   = request.getParameter("to");
 
+        // Flash messages from redirect
+        String flashSuccess = (String) request.getSession().getAttribute("successMessage");
+        String flashError   = (String) request.getSession().getAttribute("errorMessage");
+        if (flashSuccess != null) { request.setAttribute("successMessage", flashSuccess); request.getSession().removeAttribute("successMessage"); }
+        if (flashError   != null) { request.setAttribute("errorMessage",   flashError);   request.getSession().removeAttribute("errorMessage"); }
+
         // Always load report history
-        List<ReportHistory> history = reportService.getReportHistory();
-        request.setAttribute("reportHistory", history);
+        request.setAttribute("reportHistory", reportService.getReportHistory());
 
         if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
             try {
@@ -56,12 +93,12 @@ public class ReportController extends HttpServlet {
                 request.setAttribute("reservations", reservations);
                 request.setAttribute("summary", summary);
 
-                // Save this report to history
+                // Save report to history
                 User user = SessionUtil.getLoggedInUser(request);
                 int generatedBy = (user != null) ? user.getUserId() : 1;
                 reportService.saveReportHistory(summary, startDate, endDate, generatedBy);
 
-                // Reload history after save so the new entry shows immediately
+                // Reload history so new entry shows immediately
                 request.setAttribute("reportHistory", reportService.getReportHistory());
 
             } catch (IllegalArgumentException e) {
@@ -72,4 +109,3 @@ public class ReportController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/view/reports.jsp").forward(request, response);
     }
 }
-
