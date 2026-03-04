@@ -178,6 +178,11 @@
             <h3>Pricing Rates</h3>
             <p>Configure room pricing rates by type and season. Admin only.</p>
         </a>
+        <a href="${pageContext.request.contextPath}/logs" class="card card-teal">
+            <div class="icon">📋</div>
+            <h3>System Logs</h3>
+            <p>View all system audit logs and user activity. Admin only.</p>
+        </a>
         </c:if>
     </div>
 

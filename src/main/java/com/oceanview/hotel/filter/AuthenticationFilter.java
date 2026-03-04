@@ -17,7 +17,7 @@ import java.io.IOException;
  * Design Pattern: Chain of Responsibility (Servlet Filter chain)
  */
 @WebFilter(urlPatterns = {"/dashboard", "/reservations/*", "/billing/*",
-        "/rooms/*", "/reports/*", "/help", "/api/v1/*", "/staff/*", "/pricing/*"})
+        "/rooms/*", "/reports/*", "/help", "/api/v1/*", "/staff/*", "/pricing/*", "/logs/*"})
 public class AuthenticationFilter implements Filter {
 
     @Override
