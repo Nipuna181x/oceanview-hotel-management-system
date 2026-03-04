@@ -13,11 +13,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Servlet controller for billing operations.
+ * Handles: bill history list, view single bill, generate bill page.
  */
-@WebServlet("/billing")
+@WebServlet("/billing/*")
 public class BillingController extends HttpServlet {
 
     private BillingService billingService;
@@ -39,25 +41,68 @@ public class BillingController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String reservationIdStr = request.getParameter("reservationId");
-        String strategy = request.getParameter("strategy");
-        if (strategy == null || strategy.isEmpty()) strategy = "STANDARD";
+        String pathInfo = request.getPathInfo(); // null, "/", "/view", "/generate"
 
-        if (reservationIdStr != null && !reservationIdStr.isEmpty()) {
+        if (pathInfo == null || pathInfo.equals("/")) {
+            // Bill history list
+            List<Bill> bills = billingService.getAllBills();
+            request.setAttribute("bills", bills);
+            request.getRequestDispatcher("/WEB-INF/view/billing-list.jsp").forward(request, response);
+
+        } else if (pathInfo.equals("/view")) {
+            // View a single bill by billId
+            String billIdStr = request.getParameter("billId");
+            try {
+                int billId = Integer.parseInt(billIdStr);
+                Bill bill = billingService.getBillById(billId);
+                // Load full reservation for display
+                Reservation reservation = reservationService.getById(bill.getReservationId());
+                request.setAttribute("bill", bill);
+                request.setAttribute("reservation", reservation);
+                request.getRequestDispatcher("/WEB-INF/view/billing-view.jsp").forward(request, response);
+            } catch (BillNotFoundException e) {
+                request.setAttribute("errorMessage", e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/view/billing-list.jsp").forward(request, response);
+            } catch (Exception e) {
+                response.sendRedirect(request.getContextPath() + "/billing");
+            }
+
+        } else if (pathInfo.equals("/generate")) {
+            // Show generate bill form
+            request.getRequestDispatcher("/WEB-INF/view/billing-generate.jsp").forward(request, response);
+
+        } else {
+            response.sendRedirect(request.getContextPath() + "/billing");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String pathInfo = request.getPathInfo();
+
+        if ("/generate".equals(pathInfo)) {
+            String reservationIdStr = request.getParameter("reservationId");
+            String strategy = request.getParameter("strategy");
+            if (strategy == null || strategy.isEmpty()) strategy = "STANDARD";
+
             try {
                 int reservationId = Integer.parseInt(reservationIdStr);
                 Bill bill = billingService.generateBill(reservationId, strategy);
                 Reservation reservation = reservationService.getById(reservationId);
                 request.setAttribute("bill", bill);
                 request.setAttribute("reservation", reservation);
+                request.setAttribute("successMessage", "Bill generated successfully!");
+                request.getRequestDispatcher("/WEB-INF/view/billing-view.jsp").forward(request, response);
             } catch (ReservationNotFoundException e) {
-                request.setAttribute("errorMessage", "Reservation not found with ID: " + reservationIdStr);
+                request.setAttribute("errorMessage", "Reservation not found: " + reservationIdStr);
+                request.getRequestDispatcher("/WEB-INF/view/billing-generate.jsp").forward(request, response);
             } catch (IllegalArgumentException e) {
                 request.setAttribute("errorMessage", e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/view/billing-generate.jsp").forward(request, response);
             }
         }
-
-        request.getRequestDispatcher("/WEB-INF/view/billing.jsp").forward(request, response);
     }
 }
 

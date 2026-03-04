@@ -34,5 +34,20 @@ public interface RoomDAO {
      * Update room availability.
      */
     boolean updateAvailability(int roomId, boolean available);
+
+    /**
+     * Save a new room.
+     */
+    boolean save(Room room);
+
+    /**
+     * Update an existing room's details.
+     */
+    boolean update(Room room);
+
+    /**
+     * Delete a room by ID.
+     */
+    boolean delete(int roomId);
 }
 

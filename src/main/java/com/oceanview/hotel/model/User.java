@@ -15,6 +15,9 @@ public class User {
     private String username;
     private String passwordHash;
     private Role role;
+    private String fullName;
+    private String email;
+    private boolean active = true;
     private LocalDateTime createdAt;
 
     public User() {
@@ -66,6 +69,30 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override

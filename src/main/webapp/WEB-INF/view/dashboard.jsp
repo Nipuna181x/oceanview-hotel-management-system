@@ -143,16 +143,16 @@
             <p>View and manage all existing reservations.</p>
         </a>
 
-        <a href="${pageContext.request.contextPath}/rooms" class="card card-orange">
+        <a href="${pageContext.request.contextPath}/rooms/" class="card card-orange">
             <div class="icon">🛏️</div>
             <h3>Room Management</h3>
-            <p>Check room availability and manage room details.</p>
+            <p>Check availability. Admins can add, edit and delete rooms.</p>
         </a>
 
-        <a href="${pageContext.request.contextPath}/billing" class="card card-purple">
+        <a href="${pageContext.request.contextPath}/billing/" class="card card-purple">
             <div class="icon">💳</div>
             <h3>Billing</h3>
-            <p>Generate and view bills for completed reservations.</p>
+            <p>View bill history and generate invoices for reservations.</p>
         </a>
 
         <a href="${pageContext.request.contextPath}/reports" class="card card-teal">
@@ -166,6 +166,24 @@
             <h3>Help</h3>
             <p>Usage guide and system documentation for staff.</p>
         </a>
+
+        <c:if test="${currentUser.role == 'ADMIN'}">
+        <a href="${pageContext.request.contextPath}/staff" class="card card-red">
+            <div class="icon">👥</div>
+            <h3>Staff Management</h3>
+            <p>Create, edit and delete staff accounts. Admin only.</p>
+        </a>
+        <a href="${pageContext.request.contextPath}/pricing" class="card card-orange">
+            <div class="icon">💰</div>
+            <h3>Pricing Rates</h3>
+            <p>Configure room pricing rates by type and season. Admin only.</p>
+        </a>
+        <a href="${pageContext.request.contextPath}/logs" class="card card-teal">
+            <div class="icon">📋</div>
+            <h3>System Logs</h3>
+            <p>View all system audit logs and user activity. Admin only.</p>
+        </a>
+        </c:if>
     </div>
 
 </div>

@@ -20,6 +20,8 @@ public class Bill {
 
     // Transient reference for display
     private Reservation reservation;
+    private String reservationNumber; // denormalised for list view
+    private String guestName;         // denormalised for list view
 
     public Bill() {
     }
@@ -117,6 +119,12 @@ public class Bill {
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
     }
+
+    public String getReservationNumber() { return reservationNumber; }
+    public void setReservationNumber(String reservationNumber) { this.reservationNumber = reservationNumber; }
+
+    public String getGuestName() { return guestName; }
+    public void setGuestName(String guestName) { this.guestName = guestName; }
 
     @Override
     public String toString() {

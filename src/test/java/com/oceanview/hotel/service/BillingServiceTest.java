@@ -237,5 +237,57 @@ class BillingServiceTest {
                 billingService.getBillByReservationId(99)
         );
     }
+
+    // ─────────────────────────────────────────────
+    // BILL HISTORY
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Given bills exist, When getAllBills, Then return list of all bills")
+    void givenBillsExist_whenGetAllBills_thenReturnList() {
+        Bill bill1 = new Bill(1, 1, 3, 75.00, 225.00, 22.50, 247.50, "STANDARD", LocalDateTime.now());
+        Bill bill2 = new Bill(2, 2, 7, 250.00, 1750.00, 175.00, 1925.00, "SEASONAL", LocalDateTime.now());
+        when(billDAO.findAll()).thenReturn(java.util.Arrays.asList(bill1, bill2));
+
+        java.util.List<Bill> result = billingService.getAllBills();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("Given no bills, When getAllBills, Then return empty list")
+    void givenNoBills_whenGetAllBills_thenReturnEmptyList() {
+        when(billDAO.findAll()).thenReturn(java.util.Collections.emptyList());
+
+        java.util.List<Bill> result = billingService.getAllBills();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Given valid bill ID, When getBillById, Then return correct bill")
+    void givenValidBillId_whenGetBillById_thenReturnBill() {
+        Bill bill = new Bill(1, 1, 3, 75.00, 225.00, 22.50, 247.50, "STANDARD", LocalDateTime.now());
+        when(billDAO.findById(1)).thenReturn(bill);
+
+        Bill result = billingService.getBillById(1);
+
+        assertNotNull(result);
+        assertEquals(1, result.getBillId());
+        assertEquals(247.50, result.getTotalAmount(), 0.01);
+    }
+
+    @Test
+    @DisplayName("Given invalid bill ID, When getBillById, Then throw BillNotFoundException")
+    void givenInvalidBillId_whenGetBillById_thenThrowException() {
+        when(billDAO.findById(99)).thenReturn(null);
+
+        assertThrows(BillNotFoundException.class, () ->
+                billingService.getBillById(99)
+        );
+    }
 }
+
 

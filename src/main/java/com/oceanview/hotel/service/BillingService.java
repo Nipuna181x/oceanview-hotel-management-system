@@ -10,6 +10,7 @@ import com.oceanview.hotel.strategy.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service class encapsulating all billing business logic.
@@ -95,6 +96,26 @@ public class BillingService {
         if (bill == null) {
             throw new BillNotFoundException(
                     "No bill found for reservation ID: " + reservationId);
+        }
+        return bill;
+    }
+
+    /**
+     * Retrieve all bills ordered by most recent first.
+     */
+    public List<Bill> getAllBills() {
+        return billDAO.findAll();
+    }
+
+    /**
+     * Retrieve a bill by its bill ID.
+     *
+     * @throws BillNotFoundException if no bill found with that ID
+     */
+    public Bill getBillById(int billId) {
+        Bill bill = billDAO.findById(billId);
+        if (bill == null) {
+            throw new BillNotFoundException("No bill found with ID: " + billId);
         }
         return bill;
     }

@@ -1,0 +1,2 @@
+admin123 hash: $2a$12$eJhRqb1qx4hlnAU0FQzRMeBmMCT4DXsufwdvjQED/Ewc5YyKNii0e
+staff123 hash: $2a$12$zmW6CheN.JNqZOfRROV5R.iwFwUf.CF6PGprZ4k9qe6Ol2jCpzF1a

@@ -3,6 +3,8 @@ package com.oceanview.hotel.dao;
 import com.oceanview.hotel.model.Bill;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JDBC implementation of BillDAO.
@@ -83,6 +85,28 @@ public class BillDAOImpl implements BillDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public List<Bill> findAll() {
+        List<Bill> list = new ArrayList<>();
+        String sql = "SELECT b.*, r.reservation_number, g.full_name AS guest_name " +
+                     "FROM bills b " +
+                     "JOIN reservations r ON b.reservation_id = r.reservation_id " +
+                     "JOIN guests g ON r.guest_id = g.guest_id " +
+                     "ORDER BY b.generated_at DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Bill bill = mapRowToBill(rs);
+                bill.setReservationNumber(rs.getString("reservation_number"));
+                bill.setGuestName(rs.getString("guest_name"));
+                list.add(bill);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private Bill mapRowToBill(ResultSet rs) throws SQLException {
