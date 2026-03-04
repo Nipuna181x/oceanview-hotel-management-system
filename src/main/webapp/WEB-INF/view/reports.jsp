@@ -1,355 +1,111 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Reports — Ocean View Resort HMS</title>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',sans-serif; background:#f0f4f8; }
-        .navbar { background:linear-gradient(135deg,#0a3d62,#1e6091); color:white; padding:0 30px; display:flex; align-items:center; justify-content:space-between; height:60px; }
-        .navbar .brand { font-size:18px; font-weight:700; }
-        .navbar .brand span { color:#85c1e9; }
-        .navbar a { color:#d6eaf8; text-decoration:none; margin-left:20px; font-size:14px; }
-        .navbar .btn-logout { background:#e74c3c; padding:6px 14px; border-radius:6px; }
-        .main { padding:30px; max-width:1200px; margin:0 auto; }
-        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
-        .page-header h2 { color:#0a3d62; font-size:22px; }
-        .filter-card { background:white; border-radius:12px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:24px; }
-        .filter-row { display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; }
-        .filter-group label { display:block; font-size:12px; font-weight:700; color:#2c3e50; margin-bottom:6px; }
-        .filter-group input { padding:10px 14px; border:1px solid #d5d8dc; border-radius:8px; font-size:14px; }
-        .btn-primary { background:linear-gradient(135deg,#0a3d62,#2980b9); color:white; border:none; padding:11px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; }
-        .btn-print { background:linear-gradient(135deg,#27ae60,#1e8449); color:white; border:none; padding:11px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
-        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
-        .stat-card { background:white; border-radius:12px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); }
-        .stat-card .value { font-size:28px; font-weight:800; color:#0a3d62; }
-        .stat-card .value.revenue { color:#27ae60; font-size:22px; }
-        .stat-card .label { font-size:12px; color:#7f8c8d; margin-top:4px; font-weight:600; text-transform:uppercase; }
-        .stat-card.blue   { border-top:4px solid #2980b9; }
-        .stat-card.green  { border-top:4px solid #27ae60; }
-        .stat-card.teal   { border-top:4px solid #16a085; }
-        .stat-card.orange { border-top:4px solid #e67e22; }
-        .stat-card.red    { border-top:4px solid #e74c3c; }
-        .stat-card.gold   { border-top:4px solid #f39c12; }
-        .revenue-breakdown { background:white; border-radius:12px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:24px; }
-        .revenue-breakdown h3 { font-size:14px; font-weight:700; color:#0a3d62; margin-bottom:16px; padding-bottom:8px; border-bottom:2px solid #eaf4fb; }
-        .rev-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f4f6f8; }
-        .rev-row:last-child { border-bottom:none; }
-        .rev-type { font-size:13px; font-weight:600; color:#2c3e50; }
-        .rev-amount { font-size:14px; font-weight:700; color:#27ae60; }
-        .card { background:white; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.07); overflow:hidden; margin-bottom:24px; }
-        .card-header { background:#0a3d62; color:white; padding:14px 20px; font-size:14px; font-weight:700; }
-        table { width:100%; border-collapse:collapse; }
-        thead { background:#0a3d62; color:white; }
-        th { padding:12px 16px; text-align:left; font-size:13px; font-weight:600; }
-        td { padding:11px 16px; font-size:13px; color:#2c3e50; border-bottom:1px solid #f0f4f8; }
-        tr:hover td { background:#f8fbff; }
-        .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
-        .badge-confirmed   { background:#eaf4fb; color:#1e6091; }
-        .badge-checked_in  { background:#eafaf1; color:#1e8449; }
-        .badge-checked_out { background:#f4f6f7; color:#5d6d7e; }
-        .badge-cancelled   { background:#fdecea; color:#c0392b; }
-        .empty-state { text-align:center; padding:40px; color:#aaa; }
-        .alert-error { background:#fdecea; border-left:4px solid #e74c3c; color:#c0392b; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
-        .section-divider { font-size:16px; font-weight:700; color:#0a3d62; margin:32px 0 16px; padding-bottom:8px; border-bottom:2px solid #eaf4fb; }
-        .btn-sm { padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-block; }
-        .btn-view   { background:#eaf4fb; color:#1e6091; }
-        .btn-view:hover { background:#d0eaf8; }
-        .search-bar { background:white; border-radius:12px; padding:14px 20px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-        .search-bar input, .search-bar select { padding:9px 14px; border:1px solid #d5d8dc; border-radius:8px; font-size:13px; outline:none; }
-        .search-bar input { flex:1; min-width:180px; }
-        .search-bar input:focus { border-color:#2980b9; }
-        .search-bar .clear-btn { padding:9px 16px; border-radius:8px; border:none; background:#ecf0f1; color:#555; font-size:13px; cursor:pointer; font-weight:600; }
-        .result-count { font-size:12px; color:#888; }
-        .btn-delete { background:#fdecea; color:#c0392b; }
-        .btn-delete:hover { background:#fbd4d0; }
-        .alert-success { background:#eafaf1; border-left:4px solid #27ae60; color:#1e8449; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
-
-        /* ── Print styles ── */
-        @media print {
-            body { background:white; }
-            .navbar, .filter-card, .btn-print, .btn-primary, .no-print, .section-divider.no-print, #reportHistory { display:none !important; }
-            .main { padding:0; max-width:100%; }
-            .stat-card, .revenue-breakdown, .card { box-shadow:none; border:1px solid #ddd; }
-            .print-header { display:block !important; }
-            @page { margin:20mm; }
-        }
-        .print-header { display:none; text-align:center; margin-bottom:24px; }
-        .print-header h1 { font-size:20px; color:#0a3d62; }
-        .print-header p  { font-size:13px; color:#555; margin-top:4px; }
-    </style>
-</head>
-<body>
-<nav class="navbar no-print">
-    <div class="brand">🌊 Ocean View <span>Resort HMS</span></div>
-    <div>
-        <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <a href="${pageContext.request.contextPath}/reservations">Reservations</a>
-        <a href="${pageContext.request.contextPath}/rooms">Rooms</a>
-        <a href="${pageContext.request.contextPath}/billing">Billing</a>
-        <a href="${pageContext.request.contextPath}/reports">Reports</a>
-        <a href="${pageContext.request.contextPath}/help">Help</a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Logout</a>
-    </div>
-</nav>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports - Ocean View HMS</title><%@ include file="_layout-head.jsp" %>
+<style>
+.print-header{display:none;text-align:center;margin-bottom:24px;}
+.print-header h1{font-size:20px;color:var(--ink);}
+.print-header p{font-size:13px;color:var(--muted);margin-top:4px;}
+.filter-card{background:var(--white);border-radius:var(--r);padding:20px;box-shadow:0 1px 2px rgba(15,29,53,.04);border:1px solid var(--border);margin-bottom:20px;}
+.filter-row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;}
+.filter-group label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.filter-group input{padding:10px 14px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;}
+.filter-group input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(53,99,233,.1);}
+.rev-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.rev-row:last-child{border-bottom:none;}
+@media print{
+    .sidebar,.topbar,.filter-card,.no-print,#reportHistory{display:none !important;}
+    .main{margin:0;}.content{padding:20px;}
+    .print-header{display:block !important;}
+    .panel,.sc{box-shadow:none;border:1px solid #ddd;}
+    @page{margin:20mm;}
+}
+</style></head><body>
+<%@ include file="_sidebar.jsp" %>
 
 <div class="main">
+<c:set var="pageTitle" value="Reports" scope="request"/>
+<%@ include file="_header.jsp" %>
 
-    <%-- Print header (hidden on screen, visible in PDF) --%>
-    <div class="print-header">
-        <h1>🌊 Ocean View Resort — Report</h1>
-        <c:if test="${not empty summary}">
-            <p>Period: ${summary.startDate} to ${summary.endDate} &nbsp;|&nbsp; Generated: <%= new java.util.Date() %></p>
-        </c:if>
-    </div>
+<div class="content">
+<div class="print-header"><h1>Ocean View Resort - Report</h1>
+<c:if test="${not empty summary}"><p>Period: ${summary.startDate} to ${summary.endDate}</p></c:if></div>
 
-    <div class="page-header no-print">
-        <h2>📊 Occupancy &amp; Revenue Reports</h2>
-        <c:if test="${not empty summary}">
-            <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        </c:if>
-    </div>
-
-    <c:if test="${not empty errorMessage}">
-        <div class="alert-error no-print">⚠ ${errorMessage}</div>
-    </c:if>
-    <c:if test="${not empty successMessage}">
-        <div class="alert-success no-print">✓ ${successMessage}</div>
-    </c:if>
-
-    <%-- Filter Form --%>
-    <div class="filter-card no-print">
-        <form action="${pageContext.request.contextPath}/reports" method="get" class="filter-row">
-            <div class="filter-group">
-                <label>From Date</label>
-                <input type="date" name="from" value="${param.from}" />
-            </div>
-            <div class="filter-group">
-                <label>To Date</label>
-                <input type="date" name="to" value="${param.to}" />
-            </div>
-            <button type="submit" class="btn-primary">🔍 Generate Report</button>
-        </form>
-    </div>
-
-    <%-- ── GENERATED REPORT ── --%>
-    <c:if test="${not empty summary}">
-
-        <%-- Summary Stats --%>
-        <div class="stats-grid">
-            <div class="stat-card blue">
-                <div class="value">${summary.totalReservations}</div>
-                <div class="label">Total Reservations</div>
-            </div>
-            <div class="stat-card green">
-                <div class="value">${summary.confirmedCount}</div>
-                <div class="label">Confirmed</div>
-            </div>
-            <div class="stat-card teal">
-                <div class="value">${summary.checkedInCount}</div>
-                <div class="label">Checked In</div>
-            </div>
-            <div class="stat-card orange">
-                <div class="value">${summary.checkedOutCount}</div>
-                <div class="label">Checked Out</div>
-            </div>
-            <div class="stat-card red">
-                <div class="value">${summary.cancelledCount}</div>
-                <div class="label">Cancelled</div>
-            </div>
-            <div class="stat-card gold">
-                <div class="value revenue">
-                    Rs. <fmt:formatNumber value="${summary.totalRevenue}" pattern="#,##0.00"/>
-                </div>
-                <div class="label">💰 Total Revenue Earned</div>
-            </div>
-        </div>
-
-        <%-- Revenue by Room Type Breakdown --%>
-        <c:if test="${not empty summary.revenueByType}">
-        <div class="revenue-breakdown">
-            <h3>💰 Revenue Breakdown by Room Type</h3>
-            <c:forEach var="entry" items="${summary.revenueByType}">
-                <div class="rev-row">
-                    <span class="rev-type">
-                        <c:choose>
-                            <c:when test="${entry.key == 'SINGLE'}">🛏 Single</c:when>
-                            <c:when test="${entry.key == 'DOUBLE'}">🛏🛏 Double</c:when>
-                            <c:when test="${entry.key == 'SUITE'}">🏨 Suite</c:when>
-                            <c:when test="${entry.key == 'DELUXE'}">👑 Deluxe</c:when>
-                            <c:otherwise>${entry.key}</c:otherwise>
-                        </c:choose>
-                    </span>
-                    <span class="rev-amount">
-                        Rs. <fmt:formatNumber value="${entry.value}" pattern="#,##0.00"/>
-                    </span>
-                </div>
-            </c:forEach>
-        </div>
-        </c:if>
-
-        <%-- Reservations Table --%>
-        <c:choose>
-            <c:when test="${not empty reservations}">
-                <div class="card">
-                    <div class="card-header">📋 Reservations — ${summary.startDate} to ${summary.endDate}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Res. Number</th>
-                                <th>Guest Name</th>
-                                <th>NIC</th>
-                                <th>Room</th>
-                                <th>Check-In</th>
-                                <th>Check-Out</th>
-                                <th>Nights</th>
-                                <th>Status</th>
-                                <th>Amount Billed</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="res" items="${reservations}">
-                                <tr>
-                                    <td><strong>${res.reservationNumber}</strong></td>
-                                    <td>${res.guest.fullName}</td>
-                                    <td>${not empty res.guest.nic ? res.guest.nic : '—'}</td>
-                                    <td>${res.room.roomNumber} (${res.room.roomType})</td>
-                                    <td>${res.checkInDate}</td>
-                                    <td>${res.checkOutDate}</td>
-                                    <td>${res.checkOutDate.toEpochDay() - res.checkInDate.toEpochDay()}</td>
-                                    <td><span class="badge badge-${res.status.toString().toLowerCase()}">${res.status}</span></td>
-                                    <td>
-                                        <c:set var="bill" value="${billMap[res.reservationId]}"/>
-                                        <c:choose>
-                                            <c:when test="${res.status == 'CHECKED_OUT'}">
-                                                <%-- amount shown via bill lookup in service summary --%>
-                                                <span style="color:#27ae60;font-weight:700;">—</span>
-                                            </c:when>
-                                            <c:otherwise><span style="color:#aaa;">—</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </c:when>
-            <c:otherwise>
-                <div class="card"><div class="empty-state">No reservations found for the selected date range.</div></div>
-            </c:otherwise>
-        </c:choose>
-
-        <%-- Print button at bottom too --%>
-        <div style="text-align:center; margin:20px 0;" class="no-print">
-            <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        </div>
-
-    </c:if>
-
-    <%-- ── REPORT HISTORY ── --%>
-    <div id="reportHistory" class="no-print">
-        <div class="section-divider">📁 Report History</div>
-        <c:if test="${not empty reportHistory}">
-        <div class="search-bar">
-            <input type="text" id="reportSearch" placeholder="🔍 Search by date period..." oninput="filterReports()">
-            <div>
-                <input type="date" id="reportFrom" onchange="filterReports()" style="width:150px;" placeholder="From date">
-            </div>
-            <div>
-                <input type="date" id="reportTo" onchange="filterReports()" style="width:150px;" placeholder="To date">
-            </div>
-            <button class="clear-btn" onclick="clearReportFilters()">✕ Clear</button>
-            <span class="result-count" id="reportCount"></span>
-        </div>
-        </c:if>
-        <c:choose>
-            <c:when test="${not empty reportHistory}">
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Period</th>
-                                <th>Total Res.</th>
-                                <th>Confirmed</th>
-                                <th>Checked Out</th>
-                                <th>Cancelled</th>
-                                <th>Revenue Earned</th>
-                                <th>Generated At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="h" items="${reportHistory}" varStatus="s">
-                                <tr data-search="${h.fromDate} ${h.toDate}"
-                                    data-from="${h.fromDate}"
-                                    data-to="${h.toDate}">
-                                    <td>${s.index + 1}</td>
-                                    <td><strong>${h.fromDate}</strong> → <strong>${h.toDate}</strong></td>
-                                    <td>${h.totalReservations}</td>
-                                    <td>${h.confirmedCount}</td>
-                                    <td>${h.checkedOutCount}</td>
-                                    <td>${h.cancelledCount}</td>
-                                    <td style="color:#27ae60;font-weight:700;">
-                                        Rs. <fmt:formatNumber value="${h.totalRevenue}" pattern="#,##0.00"/>
-                                    </td>
-                                    <td style="font-size:12px;color:#7f8c8d;">${h.generatedAt}</td>
-                                    <td style="white-space:nowrap;">
-                                        <a href="${pageContext.request.contextPath}/reports/view?id=${h.reportId}"
-                                           class="btn-sm btn-view">👁 View</a>
-                                        &nbsp;
-                                        <a href="${pageContext.request.contextPath}/reports/delete?id=${h.reportId}"
-                                           class="btn-sm btn-delete"
-                                           onclick="return confirm('Delete this report? This cannot be undone.')">🗑 Delete</a>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </c:when>
-            <c:otherwise>
-                <div class="card"><div class="empty-state">No report history yet. Generate your first report above.</div></div>
-            </c:otherwise>
-        </c:choose>
-    </div>
-
+<div class="top-strip no-print">
+<div class="ts-left">
+<div class="ts-hi">Occupancy & Revenue Reports</div>
+<div class="ts-sub">Generate and view performance reports</div>
 </div>
-<script>
-function filterReports() {
-    const q = document.getElementById('reportSearch') ? document.getElementById('reportSearch').value.toLowerCase() : '';
-    const from = document.getElementById('reportFrom') ? document.getElementById('reportFrom').value : '';
-    const to = document.getElementById('reportTo') ? document.getElementById('reportTo').value : '';
-    const rows = document.querySelectorAll('#reportHistory tbody tr');
-    let visible = 0;
-    rows.forEach(row => {
-        const text = (row.dataset.search || '').toLowerCase();
-        const rowFrom = row.dataset.from || '';
-        const rowTo = row.dataset.to || '';
-        const show = (!q || text.includes(q)) &&
-                     (!from || rowFrom >= from) &&
-                     (!to || rowTo <= to);
-        row.style.display = show ? '' : 'none';
-        if (show) visible++;
-    });
-    const cnt = document.getElementById('reportCount');
-    if (cnt) cnt.textContent = visible + ' report' + (visible !== 1 ? 's' : '');
-}
-function clearReportFilters() {
-    if (document.getElementById('reportSearch')) document.getElementById('reportSearch').value = '';
-    if (document.getElementById('reportFrom')) document.getElementById('reportFrom').value = '';
-    if (document.getElementById('reportTo')) document.getElementById('reportTo').value = '';
-    filterReports();
-}
-window.onload = () => {
-    const rows = document.querySelectorAll('#reportHistory tbody tr');
-    const cnt = document.getElementById('reportCount');
-    if (cnt) cnt.textContent = rows.length + ' reports';
-};
-</script>
-</body>
-</html>
+<div class="ts-right">
+<c:if test="${not empty summary}"><button class="strip-btn btn-success-o" onclick="window.print()">Print / Save PDF</button></c:if>
+</div>
+</div>
 
+<c:if test="${not empty errorMessage}"><div class="alert alert-error no-print">${errorMessage}</div></c:if>
+<c:if test="${not empty successMessage}"><div class="alert alert-success no-print">${successMessage}</div></c:if>
+
+<div class="filter-card no-print">
+<form action="${pageContext.request.contextPath}/reports" method="get" class="filter-row">
+<div class="filter-group"><label>From Date</label><input type="date" name="from" value="${param.from}"/></div>
+<div class="filter-group"><label>To Date</label><input type="date" name="to" value="${param.to}"/></div>
+<button type="submit" class="strip-btn btn-primary">Generate Report</button>
+</form></div>
+
+<c:if test="${not empty summary}">
+<div class="stat-row">
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--blue-bg);"><svg fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div></div><div class="sc-num">${summary.totalReservations}</div><div class="sc-lbl">Total Reservations</div></div>
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--emerald-bg);"><svg fill="none" stroke="var(--emerald)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div></div><div class="sc-num">${summary.confirmedCount}</div><div class="sc-lbl">Confirmed</div></div>
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--teal-bg);"><svg fill="none" stroke="var(--teal)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div></div><div class="sc-num">${summary.checkedInCount}</div><div class="sc-lbl">Checked In</div></div>
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--amber-bg);"><svg fill="none" stroke="var(--amber)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div></div><div class="sc-num">${summary.checkedOutCount}</div><div class="sc-lbl">Checked Out</div></div>
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--coral-bg);"><svg fill="none" stroke="var(--coral)" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div><div class="sc-num">${summary.cancelledCount}</div><div class="sc-lbl">Cancelled</div></div>
+<div class="sc"><div class="sc-head"><div class="sc-ic" style="background:var(--emerald-bg);"><svg fill="none" stroke="var(--emerald)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div><div class="sc-num" style="font-size:20px;">Rs. <fmt:formatNumber value="${summary.totalRevenue}" pattern="#,##0.00"/></div><div class="sc-lbl">Total Revenue</div></div>
+</div>
+
+<c:if test="${not empty summary.revenueByType}">
+<div class="panel mb-6"><div class="ph"><div class="pt">Revenue by Room Type</div></div>
+<c:forEach var="entry" items="${summary.revenueByType}">
+<div class="rev-row"><span style="font-size:13px;font-weight:600;">${entry.key}</span><span style="font-size:14px;font-weight:700;color:var(--emerald);">Rs. <fmt:formatNumber value="${entry.value}" pattern="#,##0.00"/></span></div>
+</c:forEach></div></c:if>
+
+<c:choose><c:when test="${not empty reservations}">
+<div class="panel mb-6"><div class="ph"><div class="pt">Reservations - ${summary.startDate} to ${summary.endDate}</div></div>
+<table class="tbl"><thead><tr><th>Res. Number</th><th>Guest</th><th>NIC</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Nights</th><th>Status</th></tr></thead>
+<tbody><c:forEach var="res" items="${reservations}">
+<tr><td><strong>${res.reservationNumber}</strong></td><td>${res.guest.fullName}</td><td class="text-sm">${not empty res.guest.nic ? res.guest.nic : '-'}</td>
+<td>${res.room.roomNumber} (${res.room.roomType})</td><td>${res.checkInDate}</td><td>${res.checkOutDate}</td>
+<td>${res.checkOutDate.toEpochDay() - res.checkInDate.toEpochDay()}</td>
+<td><span class="sp sp-${res.status.toString().toLowerCase()}">${res.status}</span></td></tr>
+</c:forEach></tbody></table></div>
+</c:when><c:otherwise><div class="panel"><div class="empty-state">No reservations found for the selected date range.</div></div></c:otherwise></c:choose>
+<div style="text-align:center;margin:20px 0;" class="no-print"><button class="strip-btn btn-success-o" onclick="window.print()">Print / Save PDF</button></div>
+</c:if>
+
+<div id="reportHistory" class="no-print">
+<h3 style="font-size:16px;font-weight:700;margin:28px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);">Report History</h3>
+<c:if test="${not empty reportHistory}">
+<div class="search-bar"><input type="text" id="reportSearch" placeholder="Search by date period..." oninput="filterReports()">
+<input type="date" id="reportFrom" onchange="filterReports()" style="width:150px;">
+<input type="date" id="reportTo" onchange="filterReports()" style="width:150px;">
+<button class="clear-btn" onclick="clearReportFilters()">Clear</button><span class="result-count" id="reportCount"></span></div></c:if>
+<c:choose><c:when test="${not empty reportHistory}"><div class="panel">
+<table class="tbl"><thead><tr><th>#</th><th>Period</th><th>Total Res.</th><th>Confirmed</th><th>Checked Out</th><th>Cancelled</th><th>Revenue</th><th>Generated</th><th>Actions</th></tr></thead>
+<tbody><c:forEach var="h" items="${reportHistory}" varStatus="s">
+<tr data-search="${h.fromDate} ${h.toDate}" data-from="${h.fromDate}" data-to="${h.toDate}">
+<td>${s.index + 1}</td><td><strong>${h.fromDate}</strong> to <strong>${h.toDate}</strong></td>
+<td>${h.totalReservations}</td><td>${h.confirmedCount}</td><td>${h.checkedOutCount}</td><td>${h.cancelledCount}</td>
+<td class="text-success font-bold">Rs. <fmt:formatNumber value="${h.totalRevenue}" pattern="#,##0.00"/></td>
+<td class="text-muted text-sm">${h.generatedAt}</td>
+<td style="white-space:nowrap;"><a href="${pageContext.request.contextPath}/reports/view?id=${h.reportId}" class="strip-btn btn-ghost btn-sm">View</a>
+<a href="${pageContext.request.contextPath}/reports/delete?id=${h.reportId}" class="strip-btn btn-danger-o btn-sm" onclick="return confirm('Delete this report?')">Delete</a></td>
+</tr></c:forEach></tbody></table></div>
+</c:when><c:otherwise><div class="panel"><div class="empty-state">No report history yet. Generate your first report above.</div></div></c:otherwise></c:choose>
+</div>
+</div>
+</div>
+
+<script>
+function filterReports(){var q=(document.getElementById('reportSearch')||{}).value||'';q=q.toLowerCase();var f=(document.getElementById('reportFrom')||{}).value||'';var t=(document.getElementById('reportTo')||{}).value||'';var rows=document.querySelectorAll('#reportHistory tbody tr');var v=0;rows.forEach(function(r){var txt=(r.dataset.search||'').toLowerCase();var rf=r.dataset.from||'';var rt=r.dataset.to||'';var show=(!q||txt.indexOf(q)>=0)&&(!f||rf>=f)&&(!t||rt<=t);r.style.display=show?'':'none';if(show)v++;});var cnt=document.getElementById('reportCount');if(cnt)cnt.textContent=v+' reports';}
+function clearReportFilters(){var a=document.getElementById('reportSearch');if(a)a.value='';var b=document.getElementById('reportFrom');if(b)b.value='';var c=document.getElementById('reportTo');if(c)c.value='';filterReports();}
+window.onload=function(){var rows=document.querySelectorAll('#reportHistory tbody tr');var cnt=document.getElementById('reportCount');if(cnt)cnt.textContent=rows.length+' reports';};
+</script></body></html>
