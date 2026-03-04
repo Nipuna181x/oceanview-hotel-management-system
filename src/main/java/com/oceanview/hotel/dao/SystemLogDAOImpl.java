@@ -11,16 +11,13 @@ import java.util.List;
  */
 public class SystemLogDAOImpl implements SystemLogDAO {
 
-    private final Connection connection;
-
-    public SystemLogDAOImpl(Connection connection) {
-        this.connection = connection;
-    }
+    public SystemLogDAOImpl(Connection connection) {}
+    private Connection conn() { return DBConnectionFactory.getConnection(); }
 
     @Override
     public int save(SystemLog log) {
         String sql = "INSERT INTO system_logs (user_id, username, action, details, ip_address) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, log.getUserId());
             stmt.setString(2, log.getUsername());
             stmt.setString(3, log.getAction());
@@ -37,7 +34,7 @@ public class SystemLogDAOImpl implements SystemLogDAO {
     public List<SystemLog> findAll() {
         List<SystemLog> list = new ArrayList<>();
         String sql = "SELECT * FROM system_logs ORDER BY logged_at DESC";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) { e.printStackTrace(); }
@@ -48,7 +45,7 @@ public class SystemLogDAOImpl implements SystemLogDAO {
     public List<SystemLog> findByUserId(int userId) {
         List<SystemLog> list = new ArrayList<>();
         String sql = "SELECT * FROM system_logs WHERE user_id = ? ORDER BY logged_at DESC";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
@@ -60,7 +57,7 @@ public class SystemLogDAOImpl implements SystemLogDAO {
     public List<SystemLog> findByAction(String action) {
         List<SystemLog> list = new ArrayList<>();
         String sql = "SELECT * FROM system_logs WHERE action = ? ORDER BY logged_at DESC";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, action);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
@@ -81,4 +78,5 @@ public class SystemLogDAOImpl implements SystemLogDAO {
         return log;
     }
 }
+
 

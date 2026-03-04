@@ -11,18 +11,15 @@ import java.util.List;
  */
 public class ReportHistoryDAOImpl implements ReportHistoryDAO {
 
-    private final Connection connection;
-
-    public ReportHistoryDAOImpl(Connection connection) {
-        this.connection = connection;
-    }
+    public ReportHistoryDAOImpl(Connection connection) {}
+    private Connection conn() { return DBConnectionFactory.getConnection(); }
 
     @Override
     public int save(ReportHistory report) {
         String sql = "INSERT INTO report_history (report_type, from_date, to_date, " +
                 "total_reservations, confirmed_count, checked_in_count, checked_out_count, " +
                 "cancelled_count, total_revenue, generated_by) VALUES (?,?,?,?,?,?,?,?,?,?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, report.getReportType());
             stmt.setDate(2, Date.valueOf(report.getFromDate()));
             stmt.setDate(3, Date.valueOf(report.getToDate()));
@@ -48,7 +45,7 @@ public class ReportHistoryDAOImpl implements ReportHistoryDAO {
         String sql = "SELECT rh.*, u.username FROM report_history rh " +
                      "LEFT JOIN users u ON rh.generated_by = u.user_id " +
                      "ORDER BY rh.generated_at DESC";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 ReportHistory rh = new ReportHistory();
@@ -76,7 +73,7 @@ public class ReportHistoryDAOImpl implements ReportHistoryDAO {
     @Override
     public ReportHistory findById(int reportId) {
         String sql = "SELECT * FROM report_history WHERE report_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, reportId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -105,7 +102,7 @@ public class ReportHistoryDAOImpl implements ReportHistoryDAO {
     @Override
     public boolean delete(int reportId) {
         String sql = "DELETE FROM report_history WHERE report_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, reportId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -114,4 +111,5 @@ public class ReportHistoryDAOImpl implements ReportHistoryDAO {
         return false;
     }
 }
+
 

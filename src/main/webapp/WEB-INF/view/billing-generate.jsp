@@ -120,25 +120,25 @@
             <%-- ── PRICING STRATEGY ── --%>
             <div class="form-group">
                 <label for="strategy">Pricing Strategy *</label>
-                <select id="strategy" name="strategy">
-                    <option value="STANDARD" ${param.strategy == 'STANDARD' || empty param.strategy ? 'selected' : ''}>
-                        Standard Rate — base rate per night
-                    </option>
-                    <option value="SEASONAL" ${param.strategy == 'SEASONAL' ? 'selected' : ''}>
-                        Seasonal Rate — base rate + 20% peak surcharge
-                    </option>
-                    <option value="DISCOUNT" ${param.strategy == 'DISCOUNT' ? 'selected' : ''}>
-                        Long Stay Discount — 10% off for 7+ nights
-                    </option>
+                <select id="strategy" name="strategyId">
+                    <c:forEach var="s" items="${strategies}">
+                        <option value="${s.strategyId}" ${s.strategyDefault ? 'selected' : ''}>
+                            ${s.name} — ${s.adjustmentLabel}
+                            <c:if test="${not empty s.description}"> (${s.description})</c:if>
+                            <c:if test="${s.strategyDefault}"> ★ Default</c:if>
+                        </option>
+                    </c:forEach>
                 </select>
             </div>
 
             <div class="strategy-info">
-                <h4>📋 Strategy Reference</h4>
+                <h4>📋 Available Strategies</h4>
                 <ul>
-                    <li>🔵 <span>STANDARD</span> — Room rate × nights + 10% tax</li>
-                    <li>🟡 <span>SEASONAL</span> — Room rate × 1.20 × nights + 10% tax</li>
-                    <li>🟢 <span>DISCOUNT</span> — Room rate × 0.90 × nights + 10% tax (7+ nights only)</li>
+                    <c:forEach var="s" items="${strategies}">
+                        <li>${s.strategyDefault ? '⭐' : '🔹'} <span>${s.name}</span> — ${s.adjustmentLabel}
+                            <c:if test="${not empty s.description}"> — ${s.description}</c:if>
+                        </li>
+                    </c:forEach>
                 </ul>
             </div>
 

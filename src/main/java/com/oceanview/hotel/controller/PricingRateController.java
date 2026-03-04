@@ -3,7 +3,6 @@ package com.oceanview.hotel.controller;
 import com.oceanview.hotel.dao.DBConnectionFactory;
 import com.oceanview.hotel.dao.PricingRateDAOImpl;
 import com.oceanview.hotel.model.PricingRate;
-import com.oceanview.hotel.model.Room;
 import com.oceanview.hotel.model.User;
 import com.oceanview.hotel.service.PricingRateService;
 import com.oceanview.hotel.util.SessionUtil;
@@ -14,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Servlet controller for Pricing Rate Management.
@@ -47,33 +45,30 @@ public class PricingRateController extends HttpServlet {
 
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo == null || pathInfo.equals("/")) {
-            List<PricingRate> rates = pricingRateService.getAllRates();
-            request.setAttribute("rates", rates);
-            request.getRequestDispatcher("/WEB-INF/view/pricing-list.jsp").forward(request, response);
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                request.setAttribute("strategies", pricingRateService.getAllStrategies());
+                request.getRequestDispatcher("/WEB-INF/view/pricing-list.jsp").forward(request, response);
 
-        } else if (pathInfo.equals("/new")) {
-            request.getRequestDispatcher("/WEB-INF/view/pricing-form.jsp").forward(request, response);
-
-        } else if (pathInfo.equals("/edit")) {
-            try {
-                int id = Integer.parseInt(request.getParameter("id"));
-                PricingRate rate = pricingRateService.getRateById(id);
-                request.setAttribute("rate", rate);
+            } else if (pathInfo.equals("/new")) {
                 request.getRequestDispatcher("/WEB-INF/view/pricing-form.jsp").forward(request, response);
-            } catch (Exception e) {
+
+            } else if (pathInfo.equals("/edit")) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                PricingRate strategy = pricingRateService.getById(id);
+                request.setAttribute("strategy", strategy);
+                request.getRequestDispatcher("/WEB-INF/view/pricing-form.jsp").forward(request, response);
+
+            } else if (pathInfo.equals("/delete")) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                pricingRateService.deleteStrategy(id);
+                request.getSession().setAttribute("successMessage", "Pricing strategy deleted successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
             }
-
-        } else if (pathInfo.equals("/delete")) {
-            try {
-                int id = Integer.parseInt(request.getParameter("id"));
-                pricingRateService.deleteRate(id);
-                request.getSession().setAttribute("successMessage", "Pricing rate deleted successfully.");
-            } catch (Exception e) {
-                request.getSession().setAttribute("errorMessage", e.getMessage());
-            }
-            response.sendRedirect(request.getContextPath() + "/pricing");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Pricing error: " + e.getClass().getSimpleName() + " — " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/dashboard");
         }
     }
 
@@ -86,27 +81,33 @@ public class PricingRateController extends HttpServlet {
 
         if ("create".equals(action)) {
             try {
-                Room.RoomType roomType = Room.RoomType.valueOf(request.getParameter("roomType").toUpperCase());
-                String season = request.getParameter("season");
-                double rate = Double.parseDouble(request.getParameter("ratePerNight"));
+                String name = request.getParameter("name");
+                PricingRate.AdjustmentType adjustmentType =
+                        PricingRate.AdjustmentType.valueOf(request.getParameter("adjustmentType").toUpperCase());
+                double adjustmentPercent = Double.parseDouble(request.getParameter("adjustmentPercent"));
                 String description = request.getParameter("description");
-                pricingRateService.addRate(roomType, season, rate, description);
-                request.getSession().setAttribute("successMessage", "Pricing rate added successfully.");
+                boolean isDefault = "on".equals(request.getParameter("isDefault"));
+
+                pricingRateService.addStrategy(name, adjustmentType, adjustmentPercent, description, isDefault);
+                request.getSession().setAttribute("successMessage", "Pricing strategy added successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 request.setAttribute("errorMessage", e.getMessage());
                 request.getRequestDispatcher("/WEB-INF/view/pricing-form.jsp").forward(request, response);
             }
 
         } else if ("update".equals(action)) {
             try {
-                int id = Integer.parseInt(request.getParameter("rateId"));
-                Room.RoomType roomType = Room.RoomType.valueOf(request.getParameter("roomType").toUpperCase());
-                String season = request.getParameter("season");
-                double rate = Double.parseDouble(request.getParameter("ratePerNight"));
+                int id = Integer.parseInt(request.getParameter("strategyId"));
+                String name = request.getParameter("name");
+                PricingRate.AdjustmentType adjustmentType =
+                        PricingRate.AdjustmentType.valueOf(request.getParameter("adjustmentType").toUpperCase());
+                double adjustmentPercent = Double.parseDouble(request.getParameter("adjustmentPercent"));
                 String description = request.getParameter("description");
-                pricingRateService.updateRate(id, roomType, season, rate, description);
-                request.getSession().setAttribute("successMessage", "Pricing rate updated successfully.");
+                boolean isDefault = "on".equals(request.getParameter("isDefault"));
+
+                pricingRateService.updateStrategy(id, name, adjustmentType, adjustmentPercent, description, isDefault);
+                request.getSession().setAttribute("successMessage", "Pricing strategy updated successfully.");
                 response.sendRedirect(request.getContextPath() + "/pricing");
             } catch (Exception e) {
                 request.setAttribute("errorMessage", e.getMessage());
@@ -115,4 +116,3 @@ public class PricingRateController extends HttpServlet {
         }
     }
 }
-

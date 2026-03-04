@@ -1,11 +1,13 @@
 package com.oceanview.hotel.controller;
 
 import com.oceanview.hotel.dao.DBConnectionFactory;
+import com.oceanview.hotel.dao.PricingRateDAOImpl;
 import com.oceanview.hotel.dao.ReservationDAOImpl;
 import com.oceanview.hotel.dao.RoomDAOImpl;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.model.Room;
 import com.oceanview.hotel.model.User;
+import com.oceanview.hotel.service.PricingRateService;
 import com.oceanview.hotel.service.ReservationService;
 import com.oceanview.hotel.service.RoomNotAvailableException;
 import com.oceanview.hotel.util.SessionUtil;
@@ -28,6 +30,7 @@ public class ReservationController extends HttpServlet {
 
     private ReservationService reservationService;
     private com.oceanview.hotel.service.RoomService roomService;
+    private PricingRateService pricingRateService;
 
     @Override
     public void init() throws ServletException {
@@ -37,6 +40,9 @@ public class ReservationController extends HttpServlet {
         );
         roomService = new com.oceanview.hotel.service.RoomService(
                 new RoomDAOImpl(DBConnectionFactory.getConnection())
+        );
+        pricingRateService = new PricingRateService(
+                new PricingRateDAOImpl(DBConnectionFactory.getConnection())
         );
     }
 
@@ -51,6 +57,7 @@ public class ReservationController extends HttpServlet {
             // Show new reservation form with available rooms
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
@@ -140,6 +147,7 @@ public class ReservationController extends HttpServlet {
                     "Reservation created successfully! Number: " + resNumber);
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
@@ -147,6 +155,7 @@ public class ReservationController extends HttpServlet {
             request.setAttribute("errorMessage", "Room is not available: " + e.getMessage());
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
@@ -154,6 +163,7 @@ public class ReservationController extends HttpServlet {
             request.setAttribute("errorMessage", e.getMessage());
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
         }

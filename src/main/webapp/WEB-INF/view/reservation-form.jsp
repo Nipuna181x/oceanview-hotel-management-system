@@ -149,9 +149,11 @@
                 <div class="form-group">
                     <label for="pricingStrategy">Pricing Strategy *</label>
                     <select id="pricingStrategy" name="pricingStrategy">
-                        <option value="STANDARD">Standard Rate</option>
-                        <option value="SEASONAL">Seasonal (+20%)</option>
-                        <option value="DISCOUNT">Long Stay Discount (-10% for 7+ nights)</option>
+                        <c:forEach var="s" items="${strategies}">
+                            <option value="${s.name}" ${s.strategyDefault ? 'selected' : ''}>
+                                ${s.name} — ${s.adjustmentLabel}<c:if test="${s.strategyDefault}"> ★ Default</c:if>
+                            </option>
+                        </c:forEach>
                     </select>
                 </div>
                 <div class="form-group">

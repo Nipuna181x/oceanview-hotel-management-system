@@ -15,17 +15,14 @@ import java.util.List;
  */
 public class ReservationDAOImpl implements ReservationDAO {
 
-    private final Connection connection;
-
-    public ReservationDAOImpl(Connection connection) {
-        this.connection = connection;
-    }
+    public ReservationDAOImpl(Connection connection) {}
+    private Connection conn() { return DBConnectionFactory.getConnection(); }
 
     @Override
     public String save(Reservation reservation, Guest guest) {
         // Call the stored procedure sp_create_reservation
         String sql = "{CALL sp_create_reservation(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-        try (CallableStatement stmt = connection.prepareCall(sql)) {
+        try (CallableStatement stmt = conn().prepareCall(sql)) {
             stmt.setString(1, guest.getFullName());
             stmt.setString(2, guest.getAddress());
             stmt.setString(3, guest.getContactNumber());
@@ -53,7 +50,7 @@ public class ReservationDAOImpl implements ReservationDAO {
                 "JOIN guests g ON r.guest_id = g.guest_id " +
                 "JOIN rooms rm ON r.room_id = rm.room_id " +
                 "WHERE r.reservation_number = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, reservationNumber);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -73,7 +70,7 @@ public class ReservationDAOImpl implements ReservationDAO {
                 "JOIN guests g ON r.guest_id = g.guest_id " +
                 "JOIN rooms rm ON r.room_id = rm.room_id " +
                 "WHERE r.reservation_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, reservationId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -94,7 +91,7 @@ public class ReservationDAOImpl implements ReservationDAO {
                 "JOIN guests g ON r.guest_id = g.guest_id " +
                 "JOIN rooms rm ON r.room_id = rm.room_id " +
                 "ORDER BY r.created_at DESC";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 list.add(mapRowToReservation(rs));
@@ -108,7 +105,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public boolean updateStatus(int reservationId, Reservation.Status status) {
         String sql = "UPDATE reservations SET status = ? WHERE reservation_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, status.name());
             stmt.setInt(2, reservationId);
             return stmt.executeUpdate() > 0;
@@ -154,4 +151,5 @@ public class ReservationDAOImpl implements ReservationDAO {
         return r;
     }
 }
+
 

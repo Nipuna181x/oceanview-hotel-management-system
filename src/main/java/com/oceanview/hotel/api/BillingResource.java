@@ -2,6 +2,7 @@ package com.oceanview.hotel.api;
 
 import com.oceanview.hotel.dao.BillDAOImpl;
 import com.oceanview.hotel.dao.DBConnectionFactory;
+import com.oceanview.hotel.dao.PricingRateDAOImpl;
 import com.oceanview.hotel.dao.ReservationDAOImpl;
 import com.oceanview.hotel.model.Bill;
 import com.oceanview.hotel.service.BillNotFoundException;
@@ -29,7 +30,8 @@ public class BillingResource {
     public BillingResource() {
         this.billingService = new BillingService(
                 new BillDAOImpl(DBConnectionFactory.getConnection()),
-                new ReservationDAOImpl(DBConnectionFactory.getConnection())
+                new ReservationDAOImpl(DBConnectionFactory.getConnection()),
+                new PricingRateDAOImpl(DBConnectionFactory.getConnection())
         );
     }
 
@@ -38,10 +40,12 @@ public class BillingResource {
     public Response generateBill(@PathParam("reservationId") int reservationId,
                                  Map<String, String> body) {
         try {
-            String strategy = (body != null && body.get("strategy") != null)
-                    ? body.get("strategy") : "STANDARD";
+            int strategyId = 1; // default
+            if (body != null && body.get("strategyId") != null) {
+                strategyId = Integer.parseInt(body.get("strategyId"));
+            }
 
-            Bill bill = billingService.generateBill(reservationId, strategy);
+            Bill bill = billingService.generateBill(reservationId, strategyId);
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);

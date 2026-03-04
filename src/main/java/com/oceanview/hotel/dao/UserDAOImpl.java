@@ -13,16 +13,13 @@ import java.util.List;
  */
 public class UserDAOImpl implements UserDAO {
 
-    private final Connection connection;
-
-    public UserDAOImpl(Connection connection) {
-        this.connection = connection;
-    }
+    public UserDAOImpl(Connection connection) {}
+    private Connection conn() { return DBConnectionFactory.getConnection(); }
 
     @Override
     public User findByUsername(String username) {
         String sql = "SELECT user_id, username, password_hash, role, full_name, email, is_active, created_at FROM users WHERE username = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return mapRowToUser(rs);
@@ -35,7 +32,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User findById(int userId) {
         String sql = "SELECT user_id, username, password_hash, role, full_name, email, is_active, created_at FROM users WHERE user_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return mapRowToUser(rs);
@@ -48,7 +45,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public boolean save(User user) {
         String sql = "INSERT INTO users (username, password_hash, role, full_name, email, is_active) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
             stmt.setString(3, user.getRole().name());
@@ -65,7 +62,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public boolean update(User user) {
         String sql = "UPDATE users SET username = ?, password_hash = ?, role = ?, full_name = ?, email = ?, is_active = ? WHERE user_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
             stmt.setString(3, user.getRole().name());
@@ -83,7 +80,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public boolean delete(int userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             stmt.setInt(1, userId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -96,7 +93,7 @@ public class UserDAOImpl implements UserDAO {
     public List<User> findAllStaff() {
         List<User> list = new ArrayList<>();
         String sql = "SELECT user_id, username, password_hash, role, full_name, email, is_active, created_at FROM users WHERE role = 'STAFF' ORDER BY username";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) list.add(mapRowToUser(rs));
         } catch (SQLException e) {
@@ -119,4 +116,5 @@ public class UserDAOImpl implements UserDAO {
         return user;
     }
 }
+
 

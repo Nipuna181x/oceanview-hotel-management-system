@@ -3,10 +3,9 @@ package com.oceanview.hotel.strategy;
 /**
  * Strategy Pattern — defines the algorithm interface for billing calculations.
  *
- * Each concrete strategy implements a different pricing algorithm:
- * - StandardPricingStrategy: base rate, no modifications
- * - SeasonalPricingStrategy: 20% surcharge for peak season
- * - DiscountPricingStrategy: 10% discount for stays of 7+ nights
+ * Concrete implementation: DatabasePricingStrategy reads adjustment
+ * percentage from the pricing_strategies DB table. Admin can create
+ * custom strategies with SURCHARGE (+%) or DISCOUNT (-%) adjustments.
  *
  * This pattern avoids large if-else chains and allows new pricing
  * strategies to be added without modifying existing code (Open/Closed Principle).

@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>${empty rate ? 'Add Pricing Rate' : 'Edit Pricing Rate'} — Ocean View Resort HMS</title>
+    <title>${empty strategy ? 'Add Pricing Strategy' : 'Edit Pricing Strategy'} — Ocean View Resort HMS</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',sans-serif; background:#f0f4f8; }
@@ -32,6 +32,10 @@
         .form-actions { display:flex; gap:12px; margin-top:28px; }
         .alert-error { background:#fdecea; border-left:4px solid #e74c3c; color:#c0392b; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:13px; }
         .admin-badge { background:#e74c3c; color:white; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; margin-left:8px; }
+        .checkbox-group { display:flex; align-items:center; gap:8px; }
+        .checkbox-group input[type=checkbox] { width:auto; }
+        .preview-box { background:#f8fbff; border:1px solid #d6eaf8; border-radius:8px; padding:14px 16px; margin-top:16px; font-size:13px; }
+        .preview-box strong { color:#0a3d62; }
     </style>
 </head>
 <body>
@@ -39,13 +43,13 @@
     <div class="brand">🌊 Ocean View <span>Resort HMS</span></div>
     <div>
         <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <a href="${pageContext.request.contextPath}/pricing">Pricing Rates</a>
+        <a href="${pageContext.request.contextPath}/pricing">Pricing Strategies</a>
         <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Logout</a>
     </div>
 </nav>
 <div class="main">
     <div class="page-header">
-        <h2>${empty rate ? '➕ Add Pricing Rate' : '✏️ Edit Pricing Rate'} <span class="admin-badge">ADMIN</span></h2>
+        <h2>${empty strategy ? '➕ Add Pricing Strategy' : '✏️ Edit Pricing Strategy'} <span class="admin-badge">ADMIN</span></h2>
     </div>
 
     <c:if test="${not empty errorMessage}">
@@ -54,55 +58,88 @@
 
     <div class="card">
         <form method="post" action="${pageContext.request.contextPath}/pricing">
-            <input type="hidden" name="action" value="${empty rate ? 'create' : 'update'}"/>
-            <c:if test="${not empty rate}">
-                <input type="hidden" name="rateId" value="${rate.rateId}"/>
+            <input type="hidden" name="action" value="${empty strategy ? 'create' : 'update'}"/>
+            <c:if test="${not empty strategy}">
+                <input type="hidden" name="strategyId" value="${strategy.strategyId}"/>
             </c:if>
 
             <div class="form-group">
-                <label for="roomType">Room Type *</label>
-                <select id="roomType" name="roomType" required>
-                    <option value="SINGLE" ${rate.roomType == 'SINGLE' ? 'selected' : ''}>🛏 Single</option>
-                    <option value="DOUBLE" ${rate.roomType == 'DOUBLE' ? 'selected' : ''}>🛏🛏 Double</option>
-                    <option value="SUITE"  ${rate.roomType == 'SUITE'  ? 'selected' : ''}>🏨 Suite</option>
-                    <option value="DELUXE" ${rate.roomType == 'DELUXE' ? 'selected' : ''}>👑 Deluxe</option>
+                <label for="name">Strategy Name *</label>
+                <input type="text" id="name" name="name"
+                       value="${not empty strategy ? strategy.name : ''}"
+                       required placeholder="e.g. Seasonal, Weekend, Holiday"/>
+                <p class="hint">Give a descriptive name for this pricing strategy.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="adjustmentType">Adjustment Type *</label>
+                <select id="adjustmentType" name="adjustmentType" required onchange="updatePreview()">
+                    <option value="SURCHARGE" ${strategy.adjustmentType.toString() == 'SURCHARGE' ? 'selected' : ''}>
+                        📈 Surcharge (+%) — increase the base rate
+                    </option>
+                    <option value="DISCOUNT" ${strategy.adjustmentType.toString() == 'DISCOUNT' ? 'selected' : ''}>
+                        📉 Discount (-%) — decrease the base rate
+                    </option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="season">Season *</label>
-                <select id="season" name="season" required>
-                    <option value="STANDARD"  ${rate.season == 'STANDARD'  ? 'selected' : ''}>Standard</option>
-                    <option value="PEAK"      ${rate.season == 'PEAK'      ? 'selected' : ''}>Peak Season</option>
-                    <option value="OFF_PEAK"  ${rate.season == 'OFF_PEAK'  ? 'selected' : ''}>Off Peak</option>
-                    <option value="WEEKEND"   ${rate.season == 'WEEKEND'   ? 'selected' : ''}>Weekend</option>
-                    <option value="HOLIDAY"   ${rate.season == 'HOLIDAY'   ? 'selected' : ''}>Holiday</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="ratePerNight">Rate Per Night (Rs.) *</label>
-                <input type="number" id="ratePerNight" name="ratePerNight"
-                       value="${not empty rate ? rate.ratePerNight : ''}"
-                       required min="1" step="0.01" placeholder="e.g. 120.00"/>
+                <label for="adjustmentPercent">Adjustment Percentage (%) *</label>
+                <input type="number" id="adjustmentPercent" name="adjustmentPercent"
+                       value="${not empty strategy ? strategy.adjustmentPercent : '0'}"
+                       required min="0" max="100" step="0.1" placeholder="e.g. 20"
+                       oninput="updatePreview()"/>
+                <p class="hint">Enter the percentage value. E.g. 20 for +20% surcharge or -20% discount.</p>
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" name="description"
-                          placeholder="e.g. Peak season surcharge for summer months">${not empty rate ? rate.description : ''}</textarea>
-                <p class="hint">Optional. Helps staff understand when this rate applies.</p>
+                          placeholder="e.g. Peak season surcharge for summer months">${not empty strategy ? strategy.description : ''}</textarea>
+                <p class="hint">Optional. Helps staff understand when this strategy applies.</p>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isDefault" name="isDefault" ${strategy.strategyDefault ? 'checked' : ''}/>
+                    <label for="isDefault" style="margin-bottom:0;">Set as Default Strategy</label>
+                </div>
+                <p class="hint">The default strategy is pre-selected when generating bills. Only one can be default.</p>
+            </div>
+
+            <div class="preview-box" id="previewBox">
+                <strong>💡 Preview:</strong> If room rate is <strong>Rs. 5,000/night</strong> for <strong>3 nights</strong>:
+                <br/>Subtotal = 5,000 × 3 × <span id="previewMultiplier">1.00</span> = <strong>Rs. <span id="previewTotal">15,000.00</span></strong>
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    ${empty rate ? '➕ Add Rate' : '💾 Save Changes'}
+                    ${empty strategy ? '➕ Add Strategy' : '💾 Save Changes'}
                 </button>
                 <a href="${pageContext.request.contextPath}/pricing" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function updatePreview() {
+        var type = document.getElementById('adjustmentType').value;
+        var pct = parseFloat(document.getElementById('adjustmentPercent').value) || 0;
+        var multiplier;
+        if (type === 'DISCOUNT') {
+            multiplier = 1.0 - (pct / 100.0);
+        } else {
+            multiplier = 1.0 + (pct / 100.0);
+        }
+        var base = 5000;
+        var nights = 3;
+        var total = base * nights * multiplier;
+        document.getElementById('previewMultiplier').textContent = multiplier.toFixed(2);
+        document.getElementById('previewTotal').textContent = total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    updatePreview();
+</script>
 </body>
 </html>
 

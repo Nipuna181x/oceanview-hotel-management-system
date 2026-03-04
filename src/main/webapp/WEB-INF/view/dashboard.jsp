@@ -175,8 +175,8 @@
         </a>
         <a href="${pageContext.request.contextPath}/pricing" class="card card-orange">
             <div class="icon">💰</div>
-            <h3>Pricing Rates</h3>
-            <p>Configure room pricing rates by type and season. Admin only.</p>
+            <h3>Pricing Strategies</h3>
+            <p>Create and manage pricing strategies with +/- % adjustments. Admin only.</p>
         </a>
         <a href="${pageContext.request.contextPath}/logs" class="card card-teal">
             <div class="icon">📋</div>

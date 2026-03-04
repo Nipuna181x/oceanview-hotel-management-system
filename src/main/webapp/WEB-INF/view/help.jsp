@@ -69,7 +69,7 @@
             <li>Click <strong>New Reservation</strong> from the Dashboard or Reservations menu.</li>
             <li>Enter the guest's full name, contact number, address, and email.</li>
             <li>Select an available room from the dropdown.</li>
-            <li>Choose a pricing strategy: Standard, Seasonal (+20%), or Long Stay Discount (-10% for 7+ nights).</li>
+            <li>Choose a pricing strategy from the dropdown (configured by admin in Pricing Strategies).</li>
             <li>Enter the check-in and check-out dates. Check-in cannot be in the past.</li>
             <li>Click <strong>Create Reservation</strong>. A unique reservation number (e.g. RES-20260304-001) will be generated.</li>
         </ol>
@@ -84,11 +84,11 @@
         <h3>💳 Generating a Bill</h3>
         <ol>
             <li>Go to <strong>Billing</strong> from the menu.</li>
-            <li>Enter the Reservation ID and select a pricing strategy.</li>
+            <li>Enter the Reservation ID and select a pricing strategy from the dropdown.</li>
             <li>Click <strong>Generate Bill</strong> to calculate and display the invoice.</li>
             <li>Click <strong>Print Invoice</strong> to print or save as PDF.</li>
         </ol>
-        <div class="tip"><strong>Pricing Strategies:</strong> Standard = base rate | Seasonal = +20% surcharge | Discount = -10% for stays of 7+ nights.</div>
+        <div class="tip"><strong>Pricing Strategies:</strong> Managed by admin via Pricing Strategies page. Each strategy applies a surcharge (+%) or discount (-%) to the base room rate.</div>
     </div>
 
     <div class="help-card teal">

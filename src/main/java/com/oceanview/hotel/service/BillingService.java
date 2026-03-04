@@ -1,11 +1,14 @@
 package com.oceanview.hotel.service;
 
 import com.oceanview.hotel.dao.BillDAO;
+import com.oceanview.hotel.dao.PricingRateDAO;
 import com.oceanview.hotel.dao.ReservationDAO;
 import com.oceanview.hotel.model.Bill;
+import com.oceanview.hotel.model.PricingRate;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.model.Room;
-import com.oceanview.hotel.strategy.*;
+import com.oceanview.hotel.strategy.DatabasePricingStrategy;
+import com.oceanview.hotel.strategy.PricingStrategy;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -16,13 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Service class encapsulating all billing business logic.
  *
- * Design Patterns:
- * - Strategy: selects the correct PricingStrategy at runtime based on the
- *   strategy name — Standard, Seasonal, or Discount. Adding a new pricing
- *   model only requires a new class implementing PricingStrategy, with no
- *   changes to BillingService itself (Open/Closed Principle).
- * - Service Layer / Facade: single entry point for all billing operations.
- * - DAO: delegates persistence to BillDAO and ReservationDAO interfaces.
+ * Strategy Pattern — resolves pricing strategy from DB at runtime.
  */
 public class BillingService {
 
@@ -30,33 +27,30 @@ public class BillingService {
 
     private final BillDAO billDAO;
     private final ReservationDAO reservationDAO;
+    private final PricingRateDAO pricingRateDAO;
 
-    public BillingService(BillDAO billDAO, ReservationDAO reservationDAO) {
+    public BillingService(BillDAO billDAO, ReservationDAO reservationDAO, PricingRateDAO pricingRateDAO) {
         this.billDAO = billDAO;
         this.reservationDAO = reservationDAO;
+        this.pricingRateDAO = pricingRateDAO;
     }
 
     /**
-     * Generate a bill for a reservation using the specified pricing strategy.
-     *
-     * @param reservationId  the reservation to bill
-     * @param strategyName   "STANDARD", "SEASONAL", or "DISCOUNT"
-     * @return the generated Bill object
-     * @throws ReservationNotFoundException if reservation not found
-     * @throws IllegalArgumentException     if strategyName is invalid
+     * Generate a bill for a reservation using the specified pricing strategy ID.
      */
-    public Bill generateBill(int reservationId, String strategyName) {
-        // Step 1: Load reservation
+    public Bill generateBill(int reservationId, int strategyId) {
         Reservation reservation = reservationDAO.findById(reservationId);
         if (reservation == null) {
-            throw new ReservationNotFoundException(
-                    "Reservation not found with ID: " + reservationId);
+            throw new ReservationNotFoundException("Reservation not found with ID: " + reservationId);
         }
 
-        // Step 2: Select pricing strategy (Strategy pattern)
-        PricingStrategy strategy = resolveStrategy(strategyName);
+        // Look up strategy from DB
+        PricingRate strategyRecord = pricingRateDAO.findById(strategyId);
+        if (strategyRecord == null) {
+            throw new IllegalArgumentException("Pricing strategy not found with ID: " + strategyId);
+        }
+        PricingStrategy strategy = new DatabasePricingStrategy(strategyRecord);
 
-        // Step 3: Calculate billing figures
         Room room = reservation.getRoom();
         double ratePerNight = room.getRatePerNight();
 
@@ -69,7 +63,6 @@ public class BillingService {
         double totalAmount = Math.round((subtotal + taxAmount) * 100.0) / 100.0;
         subtotal = Math.round(subtotal * 100.0) / 100.0;
 
-        // Step 4: Build Bill object
         Bill bill = new Bill();
         bill.setReservationId(reservationId);
         bill.setNumNights(numNights);
@@ -80,39 +73,23 @@ public class BillingService {
         bill.setPricingStrategyUsed(strategy.getStrategyName());
         bill.setGeneratedAt(LocalDateTime.now());
 
-        // Step 5: Persist via DAO
         int billId = billDAO.save(bill);
         bill.setBillId(billId);
-
         return bill;
     }
 
-    /**
-     * Retrieve an existing bill for a reservation.
-     *
-     * @throws BillNotFoundException if no bill exists for the reservation
-     */
     public Bill getBillByReservationId(int reservationId) {
         Bill bill = billDAO.findByReservationId(reservationId);
         if (bill == null) {
-            throw new BillNotFoundException(
-                    "No bill found for reservation ID: " + reservationId);
+            throw new BillNotFoundException("No bill found for reservation ID: " + reservationId);
         }
         return bill;
     }
 
-    /**
-     * Retrieve all bills ordered by most recent first.
-     */
     public List<Bill> getAllBills() {
         return billDAO.findAll();
     }
 
-    /**
-     * Retrieve a bill by its bill ID.
-     *
-     * @throws BillNotFoundException if no bill found with that ID
-     */
     public Bill getBillById(int billId) {
         Bill bill = billDAO.findById(billId);
         if (bill == null) {
@@ -121,10 +98,6 @@ public class BillingService {
         return bill;
     }
 
-    /**
-     * Returns all reservations that are eligible for billing (CHECKED_IN or CHECKED_OUT)
-     * but do not yet have a bill generated.
-     */
     public List<Reservation> getUnbilledReservations() {
         List<Reservation> all = reservationDAO.findAll();
         return all.stream()
@@ -133,24 +106,4 @@ public class BillingService {
                 .filter(r -> billDAO.findByReservationId(r.getReservationId()) == null)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * Resolve a strategy name to a PricingStrategy implementation.
-     * Strategy Pattern — runtime selection of algorithm.
-     */
-    private PricingStrategy resolveStrategy(String strategyName) {
-        if (strategyName == null || strategyName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Pricing strategy cannot be null or empty");
-        }
-        switch (strategyName.toUpperCase()) {
-            case "STANDARD":  return new StandardPricingStrategy();
-            case "SEASONAL":  return new SeasonalPricingStrategy();
-            case "DISCOUNT":  return new DiscountPricingStrategy();
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown pricing strategy: " + strategyName +
-                        ". Valid values: STANDARD, SEASONAL, DISCOUNT");
-        }
-    }
 }
-

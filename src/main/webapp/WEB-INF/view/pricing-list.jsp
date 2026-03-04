@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pricing Rates — Ocean View Resort HMS</title>
+    <title>Pricing Strategies — Ocean View Resort HMS</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',sans-serif; background:#f0f4f8; }
@@ -19,8 +19,8 @@
         .page-header h2 { color:#0a3d62; font-size:22px; }
         .btn { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-block; }
         .btn-primary { background:linear-gradient(135deg,#0a3d62,#2980b9); color:white; }
-        .btn-warning { background:#e67e22; color:white; padding:6px 14px; font-size:13px; }
-        .btn-danger  { background:#e74c3c; color:white; padding:6px 14px; font-size:13px; }
+        .btn-warning { background:#e67e22; color:white; padding:6px 14px; font-size:13px; border-radius:6px; text-decoration:none; }
+        .btn-danger  { background:#e74c3c; color:white; padding:6px 14px; font-size:13px; border-radius:6px; text-decoration:none; }
         .card { background:white; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.07); overflow:hidden; }
         table { width:100%; border-collapse:collapse; }
         thead { background:#0a3d62; color:white; }
@@ -29,16 +29,17 @@
         tbody tr:hover { background:#f8fbff; }
         tbody td { padding:14px 16px; font-size:14px; color:#2c3e50; }
         .badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700; }
-        .badge-single  { background:#ebf5fb; color:#1a5276; }
-        .badge-double  { background:#eafaf1; color:#1e8449; }
-        .badge-suite   { background:#f5eef8; color:#6c3483; }
-        .badge-deluxe  { background:#fef9e7; color:#d68910; }
-        .badge-season  { background:#f0f3f4; color:#566573; }
-        .alert-success { background:#eafaf1; border-left:4px solid #27ae60; color:#1e8449; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:14px; }
-        .alert-error   { background:#fdecea; border-left:4px solid #e74c3c; color:#c0392b; padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:14px; }
+        .badge-surcharge { background:#fef9e7; color:#d68910; }
+        .badge-discount  { background:#eafaf1; color:#1e8449; }
+        .badge-default   { background:#eaf4fb; color:#1e6091; }
+        .alert-success { background:#eafaf1; border-left:4px solid #27ae60; color:#1e8449; padding:12px 16px; border-radius:6px; margin-bottom:20px; }
+        .alert-error   { background:#fdecea; border-left:4px solid #e74c3c; color:#c0392b; padding:12px 16px; border-radius:6px; margin-bottom:20px; }
         .empty-state { text-align:center; padding:60px 20px; color:#aaa; }
         .empty-state .icon { font-size:48px; margin-bottom:12px; }
-        .rate-value { font-weight:700; color:#0a3d62; font-size:15px; }
+        .adj-value { font-weight:700; font-size:15px; }
+        .adj-surcharge { color:#d68910; }
+        .adj-discount  { color:#27ae60; }
+        .adj-neutral   { color:#7f8c8d; }
     </style>
 </head>
 <body>
@@ -54,8 +55,8 @@
 </nav>
 <div class="main">
     <div class="page-header">
-        <h2>💰 Pricing Rate Management <span class="admin-badge">ADMIN</span></h2>
-        <a href="${pageContext.request.contextPath}/pricing/new" class="btn btn-primary">+ Add New Rate</a>
+        <h2>💰 Pricing Strategy Management <span class="admin-badge">ADMIN</span></h2>
+        <a href="${pageContext.request.contextPath}/pricing/new" class="btn btn-primary">+ Add New Strategy</a>
     </div>
 
     <c:if test="${not empty sessionScope.successMessage}">
@@ -69,12 +70,12 @@
 
     <div class="card">
         <c:choose>
-            <c:when test="${empty rates}">
+            <c:when test="${empty strategies}">
                 <div class="empty-state">
                     <div class="icon">💰</div>
-                    <p>No pricing rates configured yet.</p>
+                    <p>No pricing strategies configured yet.</p>
                     <br/>
-                    <a href="${pageContext.request.contextPath}/pricing/new" class="btn btn-primary">Add First Rate</a>
+                    <a href="${pageContext.request.contextPath}/pricing/new" class="btn btn-primary">Add First Strategy</a>
                 </div>
             </c:when>
             <c:otherwise>
@@ -82,29 +83,41 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Room Type</th>
-                            <th>Season</th>
-                            <th>Rate Per Night</th>
+                            <th>Strategy Name</th>
+                            <th>Type</th>
+                            <th>Adjustment</th>
                             <th>Description</th>
+                            <th>Default</th>
                             <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="rate" items="${rates}" varStatus="s">
+                        <c:forEach var="s" items="${strategies}" varStatus="loop">
                             <tr>
-                                <td>${s.index + 1}</td>
-                                <td><span class="badge badge-${rate.roomType.toString().toLowerCase()}">${rate.roomType}</span></td>
-                                <td><span class="badge badge-season">${rate.season}</span></td>
-                                <td class="rate-value">Rs. ${rate.ratePerNight}</td>
-                                <td>${not empty rate.description ? rate.description : '—'}</td>
-                                <td style="font-size:12px;color:#888;">${rate.createdAt}</td>
+                                <td>${loop.index + 1}</td>
+                                <td><strong>${s.name}</strong></td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/pricing/edit?id=${rate.rateId}" class="btn btn-warning">✏ Edit</a>
+                                    <span class="badge badge-${s.adjustmentType.toString().toLowerCase()}">${s.adjustmentType}</span>
+                                </td>
+                                <td>
+                                    <span class="adj-value <c:choose><c:when test="${s.adjustmentPercent == 0}">adj-neutral</c:when><c:when test="${s.adjustmentType.toString() == 'DISCOUNT'}">adj-discount</c:when><c:otherwise>adj-surcharge</c:otherwise></c:choose>">
+                                        ${s.adjustmentLabel}
+                                    </span>
+                                </td>
+                                <td>${not empty s.description ? s.description : '—'}</td>
+                                <td>
+                                    <c:if test="${s.strategyDefault}"><span class="badge badge-default">✓ DEFAULT</span></c:if>
+                                </td>
+                                <td style="font-size:12px;color:#888;">${s.createdAt}</td>
+                                <td style="white-space:nowrap;">
+                                    <a href="${pageContext.request.contextPath}/pricing/edit?id=${s.strategyId}" class="btn-warning">✏ Edit</a>
                                     &nbsp;
-                                    <a href="${pageContext.request.contextPath}/pricing/delete?id=${rate.rateId}"
-                                       class="btn btn-danger"
-                                       onclick="return confirm('Delete this pricing rate?')">🗑 Delete</a>
+                                    <c:if test="${!s.strategyDefault}">
+                                        <a href="${pageContext.request.contextPath}/pricing/delete?id=${s.strategyId}"
+                                           class="btn-danger"
+                                           onclick="return confirm('Delete this pricing strategy?')">🗑 Delete</a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>

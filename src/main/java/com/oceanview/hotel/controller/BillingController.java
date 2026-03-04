@@ -1,9 +1,8 @@
 package com.oceanview.hotel.controller;
 
-import com.oceanview.hotel.dao.BillDAOImpl;
-import com.oceanview.hotel.dao.DBConnectionFactory;
-import com.oceanview.hotel.dao.ReservationDAOImpl;
+import com.oceanview.hotel.dao.*;
 import com.oceanview.hotel.model.Bill;
+import com.oceanview.hotel.model.PricingRate;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.service.*;
 
@@ -24,17 +23,21 @@ public class BillingController extends HttpServlet {
 
     private BillingService billingService;
     private ReservationService reservationService;
+    private PricingRateService pricingRateService;
 
     @Override
     public void init() throws ServletException {
+        PricingRateDAOImpl pricingDAO = new PricingRateDAOImpl(DBConnectionFactory.getConnection());
         billingService = new BillingService(
                 new BillDAOImpl(DBConnectionFactory.getConnection()),
-                new ReservationDAOImpl(DBConnectionFactory.getConnection())
+                new ReservationDAOImpl(DBConnectionFactory.getConnection()),
+                pricingDAO
         );
         reservationService = new ReservationService(
                 new ReservationDAOImpl(DBConnectionFactory.getConnection()),
-                new com.oceanview.hotel.dao.RoomDAOImpl(DBConnectionFactory.getConnection())
+                new RoomDAOImpl(DBConnectionFactory.getConnection())
         );
+        pricingRateService = new PricingRateService(pricingDAO);
     }
 
     @Override
@@ -68,8 +71,9 @@ public class BillingController extends HttpServlet {
             }
 
         } else if (pathInfo.equals("/generate")) {
-            // Show generate bill form — pass unbilled reservations for the dropdown
+            // Load strategies and unbilled reservations
             request.setAttribute("unbilledReservations", billingService.getUnbilledReservations());
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             // Pre-fill reservationId if passed via query param (e.g. from reservation details page)
             String preselect = request.getParameter("reservationId");
             if (preselect != null && !preselect.isEmpty()) {
@@ -106,12 +110,13 @@ public class BillingController extends HttpServlet {
 
         if ("/generate".equals(pathInfo)) {
             String reservationIdStr = request.getParameter("reservationId");
-            String strategy = request.getParameter("strategy");
-            if (strategy == null || strategy.isEmpty()) strategy = "STANDARD";
+            String strategyIdStr = request.getParameter("strategyId");
 
             try {
                 int reservationId = Integer.parseInt(reservationIdStr);
-                Bill bill = billingService.generateBill(reservationId, strategy);
+                int strategyId = Integer.parseInt(strategyIdStr);
+
+                Bill bill = billingService.generateBill(reservationId, strategyId);
                 Reservation reservation = reservationService.getById(reservationId);
                 request.setAttribute("bill", bill);
                 request.setAttribute("reservation", reservation);
@@ -120,13 +125,14 @@ public class BillingController extends HttpServlet {
             } catch (ReservationNotFoundException e) {
                 request.setAttribute("errorMessage", "Reservation not found: " + reservationIdStr);
                 request.setAttribute("unbilledReservations", billingService.getUnbilledReservations());
+                request.setAttribute("strategies", pricingRateService.getAllStrategies());
                 request.getRequestDispatcher("/WEB-INF/view/billing-generate.jsp").forward(request, response);
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 request.setAttribute("errorMessage", e.getMessage());
                 request.setAttribute("unbilledReservations", billingService.getUnbilledReservations());
+                request.setAttribute("strategies", pricingRateService.getAllStrategies());
                 request.getRequestDispatcher("/WEB-INF/view/billing-generate.jsp").forward(request, response);
             }
         }
     }
 }
-
