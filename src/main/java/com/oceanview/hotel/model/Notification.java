@@ -2,10 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a notification sent when a reservation event occurs.
- * Used by the Observer pattern (EventManager + Listeners).
- */
+// Fired when a reservation event happens (created, cancelled, check-in, check-out)
 public class Notification {
 
     public enum NotificationType {
@@ -96,4 +93,3 @@ public class Notification {
                 '}';
     }
 }
-

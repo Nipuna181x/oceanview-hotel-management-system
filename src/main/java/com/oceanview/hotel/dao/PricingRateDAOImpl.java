@@ -1,28 +1,25 @@
 package com.oceanview.hotel.dao;
 
 import com.oceanview.hotel.model.PricingRate;
-import com.oceanview.hotel.model.Room;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC implementation of PricingRateDAO.
+ * JDBC implementation of PricingRateDAO — backed by pricing_strategies table.
  */
 public class PricingRateDAOImpl implements PricingRateDAO {
 
-    private final Connection connection;
+    public PricingRateDAOImpl(Connection connection) {}
 
-    public PricingRateDAOImpl(Connection connection) {
-        this.connection = connection;
-    }
+    private Connection conn() { return DBConnectionFactory.getConnection(); }
 
     @Override
     public List<PricingRate> findAll() {
         List<PricingRate> list = new ArrayList<>();
-        String sql = "SELECT * FROM pricing_rates ORDER BY room_type, season";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        String sql = "SELECT * FROM pricing_strategies ORDER BY is_default DESC, name";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) { e.printStackTrace(); }
@@ -30,10 +27,10 @@ public class PricingRateDAOImpl implements PricingRateDAO {
     }
 
     @Override
-    public PricingRate findById(int rateId) {
-        String sql = "SELECT * FROM pricing_rates WHERE rate_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, rateId);
+    public PricingRate findById(int strategyId) {
+        String sql = "SELECT * FROM pricing_strategies WHERE strategy_id = ?";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
+            stmt.setInt(1, strategyId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return mapRow(rs);
         } catch (SQLException e) { e.printStackTrace(); }
@@ -41,25 +38,35 @@ public class PricingRateDAOImpl implements PricingRateDAO {
     }
 
     @Override
-    public List<PricingRate> findByRoomType(Room.RoomType roomType) {
-        List<PricingRate> list = new ArrayList<>();
-        String sql = "SELECT * FROM pricing_rates WHERE room_type = ? ORDER BY season";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, roomType.name());
+    public PricingRate findByName(String name) {
+        String sql = "SELECT * FROM pricing_strategies WHERE name = ?";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
+            stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) list.add(mapRow(rs));
+            if (rs.next()) return mapRow(rs);
         } catch (SQLException e) { e.printStackTrace(); }
-        return list;
+        return null;
     }
 
     @Override
-    public int save(PricingRate rate) {
-        String sql = "INSERT INTO pricing_rates (room_type, season, rate_per_night, description) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, rate.getRoomType().name());
-            stmt.setString(2, rate.getSeason());
-            stmt.setDouble(3, rate.getRatePerNight());
-            stmt.setString(4, rate.getDescription());
+    public PricingRate findDefault() {
+        String sql = "SELECT * FROM pricing_strategies WHERE is_default = TRUE LIMIT 1";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return mapRow(rs);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    @Override
+    public int save(PricingRate strategy) {
+        String sql = "INSERT INTO pricing_strategies (name, adjustment_type, adjustment_percent, description, is_default) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, strategy.getName());
+            stmt.setString(2, strategy.getAdjustmentType().name());
+            stmt.setDouble(3, strategy.getAdjustmentPercent());
+            stmt.setString(4, strategy.getDescription());
+            stmt.setBoolean(5, strategy.isDefault());
             stmt.executeUpdate();
             ResultSet keys = stmt.getGeneratedKeys();
             if (keys.next()) return keys.getInt(1);
@@ -68,24 +75,25 @@ public class PricingRateDAOImpl implements PricingRateDAO {
     }
 
     @Override
-    public boolean update(PricingRate rate) {
-        String sql = "UPDATE pricing_rates SET room_type=?, season=?, rate_per_night=?, description=? WHERE rate_id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, rate.getRoomType().name());
-            stmt.setString(2, rate.getSeason());
-            stmt.setDouble(3, rate.getRatePerNight());
-            stmt.setString(4, rate.getDescription());
-            stmt.setInt(5, rate.getRateId());
+    public boolean update(PricingRate strategy) {
+        String sql = "UPDATE pricing_strategies SET name=?, adjustment_type=?, adjustment_percent=?, description=?, is_default=? WHERE strategy_id=?";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
+            stmt.setString(1, strategy.getName());
+            stmt.setString(2, strategy.getAdjustmentType().name());
+            stmt.setDouble(3, strategy.getAdjustmentPercent());
+            stmt.setString(4, strategy.getDescription());
+            stmt.setBoolean(5, strategy.isDefault());
+            stmt.setInt(6, strategy.getStrategyId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     @Override
-    public boolean delete(int rateId) {
-        String sql = "DELETE FROM pricing_rates WHERE rate_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, rateId);
+    public boolean delete(int strategyId) {
+        String sql = "DELETE FROM pricing_strategies WHERE strategy_id = ?";
+        try (PreparedStatement stmt = conn().prepareStatement(sql)) {
+            stmt.setInt(1, strategyId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
@@ -93,14 +101,14 @@ public class PricingRateDAOImpl implements PricingRateDAO {
 
     private PricingRate mapRow(ResultSet rs) throws SQLException {
         PricingRate pr = new PricingRate();
-        pr.setRateId(rs.getInt("rate_id"));
-        pr.setRoomType(Room.RoomType.valueOf(rs.getString("room_type")));
-        pr.setSeason(rs.getString("season"));
-        pr.setRatePerNight(rs.getDouble("rate_per_night"));
+        pr.setStrategyId(rs.getInt("strategy_id"));
+        pr.setName(rs.getString("name"));
+        pr.setAdjustmentType(PricingRate.AdjustmentType.valueOf(rs.getString("adjustment_type")));
+        pr.setAdjustmentPercent(rs.getDouble("adjustment_percent"));
         pr.setDescription(rs.getString("description"));
+        pr.setDefault(rs.getBoolean("is_default"));
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) pr.setCreatedAt(ts.toLocalDateTime());
         return pr;
     }
 }
-

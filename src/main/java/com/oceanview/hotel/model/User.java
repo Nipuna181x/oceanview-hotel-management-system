@@ -2,9 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a system user (Admin or Staff) for authentication.
- */
+// System user — either Admin or Staff
 public class User {
 
     public enum Role {
@@ -105,4 +103,3 @@ public class User {
                 '}';
     }
 }
-

@@ -84,6 +84,7 @@ class ReservationServiceTest {
         // Act
         String resNumber = reservationService.createReservation(
                 "John Smith", "123 Beach Road", "0771234567", "john@email.com",
+                "NIC123456", 2,
                 1, LocalDate.now().plusDays(1), LocalDate.now().plusDays(4), 1
         );
 
@@ -103,6 +104,7 @@ class ReservationServiceTest {
         assertThrows(RoomNotAvailableException.class, () ->
                 reservationService.createReservation(
                         "John Smith", "123 Beach Road", "0771234567", "john@email.com",
+                        "NIC123456", 2,
                         2, LocalDate.now().plusDays(1), LocalDate.now().plusDays(4), 1
                 )
         );
@@ -119,6 +121,7 @@ class ReservationServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 reservationService.createReservation(
                         "John Smith", "123 Beach Road", "0771234567", "john@email.com",
+                        "NIC123456", 2,
                         99, LocalDate.now().plusDays(1), LocalDate.now().plusDays(4), 1
                 )
         );
@@ -130,6 +133,7 @@ class ReservationServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 reservationService.createReservation(
                         null, "123 Beach Road", "0771234567", "john@email.com",
+                        "NIC123456", 2,
                         1, LocalDate.now().plusDays(1), LocalDate.now().plusDays(4), 1
                 )
         );

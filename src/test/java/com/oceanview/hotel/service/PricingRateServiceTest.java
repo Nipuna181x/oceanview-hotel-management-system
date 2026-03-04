@@ -2,7 +2,6 @@ package com.oceanview.hotel.service;
 
 import com.oceanview.hotel.dao.PricingRateDAO;
 import com.oceanview.hotel.model.PricingRate;
-import com.oceanview.hotel.model.Room;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * TDD Test class for PricingRateService.
- * Covers: add, update, delete, list pricing rates.
- * Follows Given / When / Then naming convention.
+ * TDD Test class for PricingRateService (strategy management).
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PricingRateService Tests")
@@ -35,29 +32,30 @@ class PricingRateServiceTest {
     @InjectMocks
     private PricingRateService pricingRateService;
 
-    private PricingRate existingRate;
+    private PricingRate standardStrategy;
 
     @BeforeEach
     void setUp() {
-        existingRate = new PricingRate();
-        existingRate.setRateId(1);
-        existingRate.setRoomType(Room.RoomType.SINGLE);
-        existingRate.setSeason("STANDARD");
-        existingRate.setRatePerNight(75.00);
-        existingRate.setDescription("Standard single room rate");
-        existingRate.setCreatedAt(LocalDateTime.now());
+        standardStrategy = new PricingRate();
+        standardStrategy.setStrategyId(1);
+        standardStrategy.setName("Standard");
+        standardStrategy.setAdjustmentType(PricingRate.AdjustmentType.SURCHARGE);
+        standardStrategy.setAdjustmentPercent(0);
+        standardStrategy.setDefault(true);
+        standardStrategy.setDescription("Base rate — no adjustment");
+        standardStrategy.setCreatedAt(LocalDateTime.now());
     }
 
     // ─────────────────────────────────────────────
-    // GET ALL RATES
+    // GET ALL STRATEGIES
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Given rates exist, When getAllRates, Then return list")
-    void givenRatesExist_whenGetAllRates_thenReturnList() {
-        when(pricingRateDAO.findAll()).thenReturn(Arrays.asList(existingRate));
+    @DisplayName("Given strategies exist, When getAllStrategies, Then return list")
+    void givenStrategiesExist_whenGetAll_thenReturnList() {
+        when(pricingRateDAO.findAll()).thenReturn(Arrays.asList(standardStrategy));
 
-        List<PricingRate> result = pricingRateService.getAllRates();
+        List<PricingRate> result = pricingRateService.getAllStrategies();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -65,11 +63,11 @@ class PricingRateServiceTest {
     }
 
     @Test
-    @DisplayName("Given no rates, When getAllRates, Then return empty list")
-    void givenNoRates_whenGetAllRates_thenReturnEmpty() {
+    @DisplayName("Given no strategies, When getAllStrategies, Then return empty list")
+    void givenNoStrategies_whenGetAll_thenReturnEmpty() {
         when(pricingRateDAO.findAll()).thenReturn(Collections.emptyList());
 
-        List<PricingRate> result = pricingRateService.getAllRates();
+        List<PricingRate> result = pricingRateService.getAllStrategies();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -80,116 +78,127 @@ class PricingRateServiceTest {
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Given valid ID, When getRateById, Then return rate")
-    void givenValidId_whenGetRateById_thenReturnRate() {
-        when(pricingRateDAO.findById(1)).thenReturn(existingRate);
+    @DisplayName("Given valid ID, When getById, Then return strategy")
+    void givenValidId_whenGetById_thenReturnStrategy() {
+        when(pricingRateDAO.findById(1)).thenReturn(standardStrategy);
 
-        PricingRate result = pricingRateService.getRateById(1);
+        PricingRate result = pricingRateService.getById(1);
 
         assertNotNull(result);
-        assertEquals(1, result.getRateId());
+        assertEquals(1, result.getStrategyId());
+        assertEquals("Standard", result.getName());
     }
 
     @Test
-    @DisplayName("Given invalid ID, When getRateById, Then throw IllegalArgumentException")
-    void givenInvalidId_whenGetRateById_thenThrowException() {
+    @DisplayName("Given invalid ID, When getById, Then throw IllegalArgumentException")
+    void givenInvalidId_whenGetById_thenThrowException() {
         when(pricingRateDAO.findById(99)).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.getRateById(99));
+                pricingRateService.getById(99));
     }
 
     // ─────────────────────────────────────────────
-    // ADD RATE
+    // ADD STRATEGY
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Given valid details, When addRate, Then save succeeds")
-    void givenValidDetails_whenAddRate_thenSaveSucceeds() {
-        when(pricingRateDAO.save(any(PricingRate.class))).thenReturn(1);
+    @DisplayName("Given valid details, When addStrategy, Then save succeeds")
+    void givenValidDetails_whenAddStrategy_thenSaveSucceeds() {
+        when(pricingRateDAO.save(any(PricingRate.class))).thenReturn(2);
 
-        int result = pricingRateService.addRate(Room.RoomType.DOUBLE, "PEAK", 160.00, "Peak season rate");
+        int result = pricingRateService.addStrategy("Seasonal",
+                PricingRate.AdjustmentType.SURCHARGE, 20.0, "Peak season", false);
 
         assertTrue(result > 0);
         verify(pricingRateDAO, times(1)).save(any(PricingRate.class));
     }
 
     @Test
-    @DisplayName("Given null room type, When addRate, Then throw IllegalArgumentException")
-    void givenNullRoomType_whenAddRate_thenThrowException() {
+    @DisplayName("Given blank name, When addStrategy, Then throw IllegalArgumentException")
+    void givenBlankName_whenAddStrategy_thenThrowException() {
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.addRate(null, "STANDARD", 75.00, "desc"));
+                pricingRateService.addStrategy("", PricingRate.AdjustmentType.SURCHARGE, 20.0, "desc", false));
     }
 
     @Test
-    @DisplayName("Given blank season, When addRate, Then throw IllegalArgumentException")
-    void givenBlankSeason_whenAddRate_thenThrowException() {
+    @DisplayName("Given null adjustment type, When addStrategy, Then throw IllegalArgumentException")
+    void givenNullType_whenAddStrategy_thenThrowException() {
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.addRate(Room.RoomType.SINGLE, "", 75.00, "desc"));
+                pricingRateService.addStrategy("Test", null, 20.0, "desc", false));
     }
 
     @Test
-    @DisplayName("Given zero rate, When addRate, Then throw IllegalArgumentException")
-    void givenZeroRate_whenAddRate_thenThrowException() {
+    @DisplayName("Given negative percent, When addStrategy, Then throw IllegalArgumentException")
+    void givenNegativePercent_whenAddStrategy_thenThrowException() {
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.addRate(Room.RoomType.SINGLE, "STANDARD", 0.00, "desc"));
-    }
-
-    @Test
-    @DisplayName("Given negative rate, When addRate, Then throw IllegalArgumentException")
-    void givenNegativeRate_whenAddRate_thenThrowException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.addRate(Room.RoomType.SINGLE, "STANDARD", -50.00, "desc"));
+                pricingRateService.addStrategy("Test", PricingRate.AdjustmentType.DISCOUNT, -5.0, "desc", false));
     }
 
     // ─────────────────────────────────────────────
-    // UPDATE RATE
+    // UPDATE STRATEGY
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Given valid ID, When updateRate, Then update succeeds")
-    void givenValidId_whenUpdateRate_thenUpdateSucceeds() {
-        when(pricingRateDAO.findById(1)).thenReturn(existingRate);
+    @DisplayName("Given valid ID, When updateStrategy, Then update succeeds")
+    void givenValidId_whenUpdateStrategy_thenUpdateSucceeds() {
+        when(pricingRateDAO.findById(1)).thenReturn(standardStrategy);
         when(pricingRateDAO.update(any(PricingRate.class))).thenReturn(true);
 
-        boolean result = pricingRateService.updateRate(1, Room.RoomType.SINGLE, "PEAK", 90.00, "Updated");
+        boolean result = pricingRateService.updateStrategy(1, "Updated",
+                PricingRate.AdjustmentType.SURCHARGE, 5.0, "Updated desc", true);
 
         assertTrue(result);
         verify(pricingRateDAO, times(1)).update(any(PricingRate.class));
     }
 
     @Test
-    @DisplayName("Given non-existent ID, When updateRate, Then throw IllegalArgumentException")
-    void givenNonExistentId_whenUpdateRate_thenThrowException() {
+    @DisplayName("Given non-existent ID, When updateStrategy, Then throw IllegalArgumentException")
+    void givenNonExistentId_whenUpdateStrategy_thenThrowException() {
         when(pricingRateDAO.findById(99)).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.updateRate(99, Room.RoomType.SINGLE, "STANDARD", 75.00, "desc"));
+                pricingRateService.updateStrategy(99, "Test",
+                        PricingRate.AdjustmentType.SURCHARGE, 10.0, "desc", false));
     }
 
     // ─────────────────────────────────────────────
-    // DELETE RATE
+    // DELETE STRATEGY
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Given valid ID, When deleteRate, Then delete succeeds")
-    void givenValidId_whenDeleteRate_thenDeleteSucceeds() {
-        when(pricingRateDAO.findById(1)).thenReturn(existingRate);
-        when(pricingRateDAO.delete(1)).thenReturn(true);
+    @DisplayName("Given non-default strategy, When deleteStrategy, Then delete succeeds")
+    void givenNonDefault_whenDeleteStrategy_thenDeleteSucceeds() {
+        PricingRate nonDefault = new PricingRate();
+        nonDefault.setStrategyId(2);
+        nonDefault.setName("Seasonal");
+        nonDefault.setDefault(false);
 
-        boolean result = pricingRateService.deleteRate(1);
+        when(pricingRateDAO.findById(2)).thenReturn(nonDefault);
+        when(pricingRateDAO.delete(2)).thenReturn(true);
+
+        boolean result = pricingRateService.deleteStrategy(2);
 
         assertTrue(result);
-        verify(pricingRateDAO, times(1)).delete(1);
+        verify(pricingRateDAO, times(1)).delete(2);
     }
 
     @Test
-    @DisplayName("Given non-existent ID, When deleteRate, Then throw IllegalArgumentException")
-    void givenNonExistentId_whenDeleteRate_thenThrowException() {
+    @DisplayName("Given default strategy, When deleteStrategy, Then throw IllegalArgumentException")
+    void givenDefaultStrategy_whenDeleteStrategy_thenThrowException() {
+        when(pricingRateDAO.findById(1)).thenReturn(standardStrategy);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                pricingRateService.deleteStrategy(1));
+    }
+
+    @Test
+    @DisplayName("Given non-existent ID, When deleteStrategy, Then throw IllegalArgumentException")
+    void givenNonExistentId_whenDeleteStrategy_thenThrowException() {
         when(pricingRateDAO.findById(99)).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () ->
-                pricingRateService.deleteRate(99));
+                pricingRateService.deleteStrategy(99));
     }
 }
 

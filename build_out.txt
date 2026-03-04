@@ -1,0 +1,32 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------< com.oceanview.hotel:oceanview-reservation-system >----------
+[INFO] Building OceanView Reservation System Maven Webapp 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[WARNING] The artifact mysql:mysql-connector-java:jar:8.0.32 has been relocated to com.mysql:mysql-connector-j:jar:8.0.32: MySQL Connector/J artifacts moved to reverse-DNS compliant Maven 2+ coordinates.
+[INFO] 
+[INFO] --- clean:3.1.0:clean (default-clean) @ oceanview-reservation-system ---
+[INFO] Deleting C:\Users\USER\Desktop\Ocean-View-Hotel-HMS\target
+[INFO] 
+[INFO] --- resources:3.0.2:resources (default-resources) @ oceanview-reservation-system ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory C:\Users\USER\Desktop\Ocean-View-Hotel-HMS\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.8.0:compile (default-compile) @ oceanview-reservation-system ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 67 source files to C:\Users\USER\Desktop\Ocean-View-Hotel-HMS\target\classes
+[INFO] 
+[INFO] --- resources:3.0.2:testResources (default-testResources) @ oceanview-reservation-system ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory C:\Users\USER\Desktop\Ocean-View-Hotel-HMS\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.8.0:testCompile (default-testCompile) @ oceanview-reservation-system ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 9 source files to C:\Users\USER\Desktop\Ocean-View-Hotel-HMS\target\test-classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.193 s
+[INFO] Finished at: 2026-03-04T22:37:02+05:30
+[INFO] ------------------------------------------------------------------------

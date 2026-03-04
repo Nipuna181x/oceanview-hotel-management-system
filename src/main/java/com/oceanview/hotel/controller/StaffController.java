@@ -14,10 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Servlet controller for Staff Management.
- * ADMIN only — all requests checked for ADMIN role.
- */
+// Staff account management — admin only
 @WebServlet("/staff/*")
 public class StaffController extends HttpServlet {
 

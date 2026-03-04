@@ -2,9 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a hotel guest who makes a reservation.
- */
+// Guest who made a reservation
 public class Guest {
 
     private int guestId;
@@ -12,17 +10,19 @@ public class Guest {
     private String address;
     private String contactNumber;
     private String email;
+    private String nic;
     private LocalDateTime createdAt;
 
     public Guest() {
     }
 
-    public Guest(int guestId, String fullName, String address, String contactNumber, String email, LocalDateTime createdAt) {
+    public Guest(int guestId, String fullName, String address, String contactNumber, String email, String nic, LocalDateTime createdAt) {
         this.guestId = guestId;
         this.fullName = fullName;
         this.address = address;
         this.contactNumber = contactNumber;
         this.email = email;
+        this.nic = nic;
         this.createdAt = createdAt;
     }
 
@@ -66,6 +66,14 @@ public class Guest {
         this.email = email;
     }
 
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -82,8 +90,8 @@ public class Guest {
                 ", address='" + address + '\'' +
                 ", contactNumber='" + contactNumber + '\'' +
                 ", email='" + email + '\'' +
+                ", nic='" + nic + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }
 }
-

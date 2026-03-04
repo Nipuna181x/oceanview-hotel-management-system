@@ -3,9 +3,7 @@ package com.oceanview.hotel.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Represents a room reservation linking a guest to a room for specific dates.
- */
+// A reservation ties a guest to a room for a set of dates
 public class Reservation {
 
     public enum Status {
@@ -21,8 +19,9 @@ public class Reservation {
     private Status status;
     private int createdBy;
     private LocalDateTime createdAt;
+    private int numGuests;
 
-    // Transient references for display purposes (not persisted directly)
+    // Loaded separately for display — not persisted here
     private Guest guest;
     private Room room;
 
@@ -115,6 +114,14 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
+    public int getNumGuests() {
+        return numGuests;
+    }
+
+    public void setNumGuests(int numGuests) {
+        this.numGuests = numGuests;
+    }
+
     public Guest getGuest() {
         return guest;
     }
@@ -142,8 +149,8 @@ public class Reservation {
                 ", checkOutDate=" + checkOutDate +
                 ", status=" + status +
                 ", createdBy=" + createdBy +
+                ", numGuests=" + numGuests +
                 ", createdAt=" + createdAt +
                 '}';
     }
 }
-

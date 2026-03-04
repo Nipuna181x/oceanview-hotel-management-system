@@ -2,10 +2,7 @@ package com.oceanview.hotel.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a bill generated for a reservation.
- * Stores calculated totals including tax.
- */
+// Bill generated for a completed reservation, includes tax totals
 public class Bill {
 
     private int billId;
@@ -18,10 +15,10 @@ public class Bill {
     private String pricingStrategyUsed;
     private LocalDateTime generatedAt;
 
-    // Transient reference for display
+    // Not stored in DB — used for display only
     private Reservation reservation;
-    private String reservationNumber; // denormalised for list view
-    private String guestName;         // denormalised for list view
+    private String reservationNumber;
+    private String guestName;
 
     public Bill() {
     }
@@ -141,4 +138,3 @@ public class Bill {
                 '}';
     }
 }
-

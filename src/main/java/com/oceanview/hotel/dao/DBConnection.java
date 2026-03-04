@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
+// Singleton DB connection — double-checked locking to stay thread-safe
 public class DBConnection {
 
 	private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/oceanviewresort_hms";

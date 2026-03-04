@@ -1,5 +1,7 @@
 package com.oceanview.hotel.service;
 
+import com.oceanview.hotel.dao.BillDAO;
+import com.oceanview.hotel.dao.ReportHistoryDAO;
 import com.oceanview.hotel.dao.ReservationDAO;
 import com.oceanview.hotel.model.Guest;
 import com.oceanview.hotel.model.Reservation;
@@ -32,6 +34,12 @@ class ReportServiceTest {
 
     @Mock
     private ReservationDAO reservationDAO;
+
+    @Mock
+    private BillDAO billDAO;
+
+    @Mock
+    private ReportHistoryDAO reportHistoryDAO;
 
     @InjectMocks
     private ReportService reportService;

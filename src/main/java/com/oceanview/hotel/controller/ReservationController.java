@@ -1,13 +1,16 @@
 package com.oceanview.hotel.controller;
 
 import com.oceanview.hotel.dao.DBConnectionFactory;
+import com.oceanview.hotel.dao.PricingRateDAOImpl;
 import com.oceanview.hotel.dao.ReservationDAOImpl;
 import com.oceanview.hotel.dao.RoomDAOImpl;
 import com.oceanview.hotel.model.Reservation;
 import com.oceanview.hotel.model.Room;
 import com.oceanview.hotel.model.User;
+import com.oceanview.hotel.service.PricingRateService;
 import com.oceanview.hotel.service.ReservationService;
 import com.oceanview.hotel.service.RoomNotAvailableException;
+import com.oceanview.hotel.util.LogUtil;
 import com.oceanview.hotel.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -19,15 +22,13 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Servlet controller for reservation operations.
- * MVC Pattern — Controller handling all reservation-related HTTP requests.
- */
+// Handles all reservation routes — list, view, create, check-in/out, cancel
 @WebServlet(urlPatterns = {"/reservations", "/reservations/new", "/reservations/*"})
 public class ReservationController extends HttpServlet {
 
     private ReservationService reservationService;
     private com.oceanview.hotel.service.RoomService roomService;
+    private PricingRateService pricingRateService;
 
     @Override
     public void init() throws ServletException {
@@ -37,6 +38,9 @@ public class ReservationController extends HttpServlet {
         );
         roomService = new com.oceanview.hotel.service.RoomService(
                 new RoomDAOImpl(DBConnectionFactory.getConnection())
+        );
+        pricingRateService = new PricingRateService(
+                new PricingRateDAOImpl(DBConnectionFactory.getConnection())
         );
     }
 
@@ -51,24 +55,25 @@ public class ReservationController extends HttpServlet {
             // Show new reservation form with available rooms
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/cancel")) {
-            // Cancel reservation
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.cancelReservation(id);
+                LogUtil.log(request, "CANCEL_RESERVATION", "Cancelled reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations?msg=cancelled");
             } catch (Exception e) {
                 response.sendRedirect(request.getContextPath() + "/reservations?error=" + e.getMessage());
             }
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/checkin")) {
-            // Check in
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.checkIn(id);
+                LogUtil.log(request, "CHECK_IN", "Checked in reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations/" +
                         reservationService.getById(id).getReservationNumber());
             } catch (Exception e) {
@@ -76,10 +81,10 @@ public class ReservationController extends HttpServlet {
             }
 
         } else if (pathInfo != null && pathInfo.matches("/\\d+/checkout")) {
-            // Check out
             int id = Integer.parseInt(pathInfo.split("/")[1]);
             try {
                 reservationService.checkOut(id);
+                LogUtil.log(request, "CHECK_OUT", "Checked out reservation ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/reservations/" +
                         reservationService.getById(id).getReservationNumber());
             } catch (Exception e) {
@@ -119,24 +124,29 @@ public class ReservationController extends HttpServlet {
         String address       = request.getParameter("address");
         String contactNumber = request.getParameter("contactNumber");
         String email         = request.getParameter("email");
+        String nic           = request.getParameter("nic");
+        String numGuestsStr  = request.getParameter("numGuests");
         String roomIdStr     = request.getParameter("roomId");
         String checkInStr    = request.getParameter("checkInDate");
         String checkOutStr   = request.getParameter("checkOutDate");
 
         try {
             int roomId = Integer.parseInt(roomIdStr);
+            int numGuests = (numGuestsStr != null && !numGuestsStr.isEmpty()) ? Integer.parseInt(numGuestsStr) : 1;
             LocalDate checkIn  = LocalDate.parse(checkInStr);
             LocalDate checkOut = LocalDate.parse(checkOutStr);
 
             String resNumber = reservationService.createReservation(
-                    guestName, address, contactNumber, email,
+                    guestName, address, contactNumber, email, nic, numGuests,
                     roomId, checkIn, checkOut, createdBy
             );
+            LogUtil.log(request, "CREATE_RESERVATION", "Created reservation " + resNumber + " for guest: " + guestName);
 
             request.setAttribute("successMessage",
                     "Reservation created successfully! Number: " + resNumber);
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
@@ -144,6 +154,7 @@ public class ReservationController extends HttpServlet {
             request.setAttribute("errorMessage", "Room is not available: " + e.getMessage());
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
 
@@ -151,6 +162,7 @@ public class ReservationController extends HttpServlet {
             request.setAttribute("errorMessage", e.getMessage());
             List<Room> availableRooms = roomService.getAvailableRooms(null);
             request.setAttribute("availableRooms", availableRooms);
+            request.setAttribute("strategies", pricingRateService.getAllStrategies());
             request.setAttribute("today", LocalDate.now().toString());
             request.getRequestDispatcher("/WEB-INF/view/reservation-form.jsp").forward(request, response);
         }
